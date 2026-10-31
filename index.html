@@ -455,7 +455,8 @@ function rowToL(r){const g=r.geo||{},lot=100000+r.id;IMG[lot]=DB.url+"/storage/v
 async function dbGet(q){const r=await fetch(DB.url+"/rest/v1/properties?"+q,{headers:{apikey:DB.key,Authorization:"Bearer "+DB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
 const SEL="select=id,address,land_sqft,lawn_sqft,beds_sqft,hard_sqft,house_sqft,geo,image_path,status";
 const FUNC=DB.url+"/functions/v1/measure";
-const fhead={apikey:DB.key,"Content-Type":"application/json"};
+const ANON=""; // legacy anon public key (only needed while the measure function enforces JWT)
+const fhead=Object.assign({apikey:DB.key,"Content-Type":"application/json"},ANON?{Authorization:"Bearer "+ANON}:{});
 const LOTS=[];   // [address, lot #, lot sq ft, meters per image pixel, property line in image px]
 const BEDS_MEASURED={}; // lot # -> bed sq ft, traced in owner view
 const DEF={nonTurf:3700,bedDefault:600,pBase:32.5,pPpk:5.85,sBase:15,sPpk:3,tBase:32.5,tPpk:6.5,tLab:12,tMat:1.6,rounds:7,cBi:17,cWk:24,ovh:6,stress:8,
