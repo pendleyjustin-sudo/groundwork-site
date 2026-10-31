@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Groundwork Instant Quote</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: phone-first app column (max 560px) — mow-striped header, then one step at a time; fixed action bar carries the running total. */
+:root{
+  /* Groundwork brand: Forest #1E3A2F, Sage #6B8F71, Stone #D9D6C8, Charcoal #2B2B28, Earth #8C6F4E */
+  --paper:#f2f1ec; --surface:#ffffff; --ink:#2b2b28; --muted:#646b63; --faint:#9a9f97; --hair:rgba(43,43,40,.09);
+  --fill:rgba(30,58,47,.055); --fill-2:rgba(30,58,47,.1); --glass:rgba(247,246,242,.82);
+  --field:#1e3a2f; --field-ink:#ffffff; --sage:#6b8f71; --stone:#d9d6c8; --earth:#8c6f4e;
+  --clover:#d9d6c8; --straw:#c9a46a; --tint:rgba(107,143,113,.14); --danger:#b0412d; --focus:#6b8f71;
+  --display:"Montserrat",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --text:"Montserrat",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --r-lg:22px; --r-md:18px; --r-sm:12px;
+  --lift:0 0 0 .5px rgba(43,43,40,.06),0 1px 2px rgba(43,43,40,.04),0 12px 32px -18px rgba(30,58,47,.28);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#101613;--surface:#18201c;--ink:#ecebe5;--muted:#a3aaa1;--faint:#727a71;--hair:rgba(255,255,255,.08);--fill:rgba(255,255,255,.06);--fill-2:rgba(255,255,255,.1);--glass:rgba(16,22,19,.82);--field:#8fb294;--field-ink:#10201a;--sage:#8fb294;--stone:#d9d6c8;--earth:#b8956c;--clover:#d9d6c8;--straw:#d9b57a;--tint:rgba(143,178,148,.14);--danger:#f0927f;--focus:#8fb294;--lift:0 0 0 .5px rgba(255,255,255,.06),0 12px 32px -18px rgba(0,0,0,.8);color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#101613;--surface:#18201c;--ink:#ecebe5;--muted:#a3aaa1;--faint:#727a71;--hair:rgba(255,255,255,.08);--fill:rgba(255,255,255,.06);--fill-2:rgba(255,255,255,.1);--glass:rgba(16,22,19,.82);--field:#8fb294;--field-ink:#10201a;--sage:#8fb294;--stone:#d9d6c8;--earth:#b8956c;--clover:#d9d6c8;--straw:#d9b57a;--tint:rgba(143,178,148,.14);--danger:#f0927f;--focus:#8fb294;--lift:0 0 0 .5px rgba(255,255,255,.06),0 12px 32px -18px rgba(0,0,0,.8);color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.55;letter-spacing:0;-webkit-font-smoothing:antialiased;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 140px}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* Signature: the mowed-lawn header */
+.lawn{position:relative;border-radius:var(--r-lg);overflow:hidden;color:#f2f1ec;padding:22px 22px 26px;background:#1e3a2f}
+.lawn .arcs{position:absolute;right:-34px;bottom:-40px;width:210px;height:210px;opacity:.9;pointer-events:none;animation:rise 1.1s cubic-bezier(.2,.7,.2,1) both}
+.lawn>*:not(.arcs){position:relative}
+@keyframes rise{from{transform:translate(30px,30px);opacity:0}to{transform:none;opacity:.9}}
+.lawn .mark{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.95rem}
+.lawn .logo{width:30px;height:30px;flex:none}
+.wordmark{display:flex;flex-direction:column;line-height:1}
+.wordmark b{font-weight:800;font-size:1.02rem;letter-spacing:.06em}
+.wordmark small{font-weight:600;font-size:.52rem;letter-spacing:.62em;margin-top:4px;color:#d9d6c8}
+.lawn h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,8vw,2.7rem);line-height:1.04;letter-spacing:-.02em;margin:18px 0 10px;text-wrap:balance}
+.lawn p{margin:0;max-width:34ch;color:#d9d6c8}
+.lawn .tag{margin-top:16px;font-size:.72rem;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:#a9bfa6}
+.compact .lawn{padding:14px 18px}
+.embed .compact .lawn{display:none}
+.compact .lawn h1,.compact .lawn p,.compact .lawn .tag{display:none}
+.compact .lawn .arcs{width:120px;height:120px;right:-30px;bottom:-50px}
+
+.find{position:relative}
+.find input{width:100%;font:inherit;font-size:1.08rem;padding:17px 18px 17px 50px;border-radius:var(--r-md);border:0;background:var(--surface);color:var(--ink);box-shadow:var(--lift);transition:box-shadow .15s}
+.find input::placeholder{color:var(--muted)}
+.find input:focus{outline:none;box-shadow:0 0 0 3px rgba(42,109,176,.18),0 0 0 1px var(--focus)}
+.find svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 8px);margin:0;padding:6px;list-style:none;background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-md);box-shadow:var(--lift);max-height:320px;overflow:auto;z-index:40}
+.sugg li{padding:12px 14px;border-radius:var(--r-sm);cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.sugg li small{color:var(--muted)}
+.sugg li[aria-selected="true"],.sugg li:hover{background:var(--tint)}
+.sugg li.none{cursor:default;color:var(--muted)}
+
+.modern{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+.vs{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--lift);overflow:hidden;margin-top:4px}
+.vsrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:.5px solid var(--hair)}
+.vsrow:first-child{border-top:none}
+.vsrow>span{padding:12px 14px;font-size:.92rem}
+.vsrow>span:first-child{color:var(--muted)}
+.vsrow>span:last-child{font-weight:600;background:var(--tint)}
+.vshead>span{font-size:.82rem;font-weight:700!important;color:var(--muted)!important}
+.vshead>span:last-child{color:var(--field)!important}
+.plate{margin-top:26px;display:flex;flex-direction:column;gap:16px}
+.promises{display:flex;flex-direction:column;gap:14px;padding:4px 2px}
+.promise{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start}
+.promise .ic{width:36px;height:36px;border-radius:50%;background:var(--tint);display:grid;place-items:center;color:var(--field)}
+.promise b{display:block;font-weight:600}
+.promise span{color:var(--muted);font-size:.94rem}
+
+/* Founding offer */
+.offer{margin-top:14px;background:var(--surface);border-radius:var(--r-md);box-shadow:var(--lift);padding:16px 18px;display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--earth)}
+.offer .k{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--earth)}
+.offer b{font-size:1.05rem}
+.offer span{color:var(--muted);font-size:.92rem}
+.offer .meter{height:6px;border-radius:6px;background:var(--fill-2);overflow:hidden;margin-top:4px}
+.offer .meter i{display:block;height:100%;background:var(--earth)}
+/* After-visit texts */
+.texts{margin-top:26px;display:flex;flex-direction:column;gap:12px}
+.phone{background:var(--surface);border-radius:28px;box-shadow:var(--lift);padding:14px 14px 18px;max-width:380px;width:100%;align-self:center;border:6px solid #2b2b28}
+.phone .who{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0 12px;border-bottom:.5px solid var(--hair);margin-bottom:12px}
+.phone .av{width:38px;height:38px;border-radius:50%;background:#1e3a2f;display:grid;place-items:center}
+.phone .who b{font-size:.82rem;font-weight:600}
+.phone .when{text-align:center;font-size:.72rem;color:var(--faint);margin:12px 0 6px}
+.bub{background:var(--fill-2);border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:.88rem;line-height:1.45;max-width:88%;margin-bottom:6px}
+.bub.me{background:#1e3a2f;color:#f2f1ec;border-radius:18px 18px 6px 18px;margin-left:auto}
+/* Trust */
+.trust{margin-top:26px;display:flex;flex-direction:column;gap:14px}
+.badges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.badge{background:var(--tint);border-radius:var(--r-sm);padding:12px;display:flex;flex-direction:column;gap:2px}
+.badge b{font-size:.9rem}
+.badge span{font-size:.8rem;color:var(--muted)}
+/* Share + lock */
+.lock{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;padding:12px 14px;border-radius:var(--r-sm);background:var(--fill)}
+.lock svg{flex:none;color:var(--field);margin-top:2px}
+.share{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.share.one{grid-template-columns:1fr}
+.sbtn{font:inherit;font-weight:600;font-size:.92rem;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 12px;border-radius:999px;border:1.5px solid var(--field);color:var(--field);background:transparent;cursor:pointer;text-decoration:none;text-align:center}
+.sbtn.fill{background:var(--field);color:var(--field-ink)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#2b2b28;color:#f2f1ec;padding:10px 16px;border-radius:999px;font-size:.88rem;z-index:60}
+/* Short version */
+.short{background:var(--tint);border-radius:var(--r-md);padding:16px 18px}
+.short h3{font-family:var(--display);font-weight:700;font-size:1.1rem;margin:0 0 8px}
+.short ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;font-size:.93rem}
+.fine{font-weight:600;color:var(--field);cursor:pointer;list-style:none;padding:4px 0}
+.fine::-webkit-details-marker{display:none}
+
+/* Steps */
+.steps{display:flex;gap:6px;align-items:center}
+.steps i{flex:1;height:4px;border-radius:4px;background:var(--fill-2)}
+.steps i.on{background:var(--field)}
+.steprow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.back{background:none;border:none;padding:6px 0;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-weight:500}
+.stepname{font-size:.9rem;color:var(--muted)}
+h2{font-family:var(--display);font-weight:700;font-size:1.5rem;letter-spacing:-.015em;line-height:1.12;margin:0}
+.sub{color:var(--muted);margin:6px 0 0}
+
+/* Yard */
+.yard{border-radius:var(--r-lg);overflow:hidden;background:var(--surface);box-shadow:var(--lift)}
+.aerial{position:relative;aspect-ratio:1/1;max-width:100%;background:var(--tint)}
+.aerial img{display:block;width:100%;height:100%;object-fit:cover}
+.aerial svg{position:absolute;inset:0;width:100%;height:100%}
+.aerial .pin{position:absolute;left:14px;top:14px;background:rgba(15,22,18,.72);color:#f3f8ef;font-size:.82rem;padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px)}
+.yardinfo{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.yardinfo h3{font-family:var(--display);font-weight:700;font-size:1.35rem;margin:0;letter-spacing:-.01em}
+.measures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.measures div{display:flex;flex-direction:column}
+.measures span{font-size:.8rem;color:var(--muted)}
+.measures b{font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+/* On-demand measuring */
+#s1.loading>:not(.steprow):not(.steps):not(#yard){display:none!important}
+#s1.loading .yardinfo .bdown,#s1.loading .yardinfo .extra,#s1.loading .yardinfo .note,#s1.loading .yardinfo .measures,#s1.loading .yardinfo .legend{display:none}
+.mload{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(160deg,#1e3a2f,#2b4b3c);color:#f2f1ec;text-align:center;padding:24px}
+#s1.loading .mload,#s1.failed .mload{display:flex}
+body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#s1.loading .aerial .pin,#s1.failed .aerial .pin{display:none!important}
+.mload .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(242,241,236,.2);border-top-color:#9fb89f;animation:spin 1s linear infinite}
+#s1.failed .mload .spin{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mload b{font-size:1.05rem}
+.mload span{font-size:.9rem;color:#d9d6c8;max-width:30ch}
+.mload a{color:#f2f1ec;font-weight:700}
+.review{background:var(--tint);border-radius:var(--r-sm);padding:12px 14px;font-size:.9rem}
+/* Measured yard */
+.aerial .pin{transition:background .3s}
+.aerial .pin.busy::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#9fb89f;margin-right:7px;vertical-align:1px;animation:blink .8s infinite alternate}
+@keyframes blink{to{opacity:.2}}
+.aerial .scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#d9f0c8,transparent);box-shadow:0 0 14px 3px rgba(190,230,160,.55);top:0;opacity:0;pointer-events:none}
+.aerial.run .scan{animation:scan 1.5s .5s ease-in-out both}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+#asvg .ring{stroke-dasharray:1;stroke-dashoffset:0}
+#asvg .lyr{transition:opacity .25s}
+.aerial.run #asvg .ring{animation:draw .9s ease-out both}
+.aerial.run #asvg .L-house{animation:pop .4s .45s both}
+.aerial.run #asvg .L-hard{animation:pop .4s .75s both}
+.aerial.run #asvg .L-beds{animation:pop .4s 1.05s both}
+.aerial.run #asvg .L-woods{animation:pop .4s 1.2s both}
+.aerial.run #asvg .L-lawn{animation:pop .2s .5s both}
+.aerial.run #asvg .sweep{animation:sweep 1.5s .5s ease-in-out both}
+.aerial.run #asvg .tags{animation:pop .4s 2s both}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0}to{opacity:1}}
+@keyframes sweep{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+#asvg .sweep{transform-origin:0 0;transform-box:view-box}
+#asvg.f-woods .lyr:not(.L-woods),#asvg.f-lawn .lyr:not(.L-lawn),#asvg.f-beds .lyr:not(.L-beds),#asvg.f-hard .lyr:not(.L-hard),#asvg.f-house .lyr:not(.L-house){opacity:.12}
+#asvg .tag rect{fill:rgba(20,28,24,.78)}
+#asvg .tag text{fill:#f2f1ec;font:600 12px Montserrat,system-ui,sans-serif}
+.bdown{display:flex;flex-direction:column;gap:8px}
+.bbar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--fill-2)}
+.bbar i{display:block;height:100%;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.chip{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:12px minmax(0,1fr);gap:4px 8px;align-items:center;padding:9px 11px;border-radius:var(--r-sm);background:var(--fill)}
+.chip i{width:12px;height:12px;border-radius:3px}
+.chip span{font-size:.78rem;color:var(--muted)}
+.chip b{grid-column:2;font-size:1rem;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--field);background:var(--tint)}
+.chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.extra{display:flex;flex-direction:column;gap:8px;padding-top:4px;border-top:.5px solid var(--hair)}
+.extra b{font-size:.95rem}
+.extra p{margin:0;font-size:.84rem;color:var(--muted)}
+.xseg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.xseg button{font:inherit;font-size:.8rem;font-weight:600;padding:9px 4px;border-radius:10px;border:0;background:var(--fill);color:var(--ink);cursor:pointer;line-height:1.25}
+.xseg button small{display:block;font-weight:500;color:var(--muted);font-size:.72rem}
+.xseg button[aria-pressed="true"]{background:var(--field);color:var(--field-ink)}
+.xseg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.eq{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.5}
+.eq b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.aerial.run *{animation:none!important}.bbar i{transition:none}}
+
+/* Plan choice */
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border-radius:var(--r-md);padding:16px;box-shadow:var(--lift);border:1.5px solid transparent;display:flex;flex-direction:column;gap:2px}
+.opt[aria-checked="true"]{border-color:var(--field)}
+.opt .price{font-family:var(--display);font-weight:700;font-size:2.05rem;letter-spacing:-.02em;line-height:1.05;margin-top:8px;font-variant-numeric:tabular-nums}
+.opt .price small{font-family:var(--text);font-size:.9rem;font-weight:500;color:var(--muted);letter-spacing:0}
+.opt b{font-weight:600}
+.opt span{font-size:.86rem;color:var(--muted)}
+.opt .flag{font-size:.78rem;font-weight:600;color:var(--field)}
+.opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.list{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--lift);overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:15px 16px;border-top:.5px solid var(--hair);cursor:pointer}
+.row:first-child{border-top:none}
+.row b{display:block;font-weight:600}
+.row .d{font-size:.86rem;color:var(--muted)}
+.row .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.row .amt small{display:block;font-weight:400;font-size:.76rem;color:var(--muted)}
+.tog{appearance:none;margin:0;width:51px;height:31px;border-radius:999px;background:var(--fill-2);position:relative;cursor:pointer;transition:background .2s}
+.tog::after{content:"";position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .2s}
+.tog:checked{background:var(--sage)}
+.tog:checked::after{transform:translateX(20px)}
+.tiers{display:flex;flex-direction:column;gap:10px}
+.tier{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--surface);border-radius:var(--r-md);padding:16px 18px;box-shadow:var(--lift);transition:box-shadow .15s,background .15s}
+.tier[aria-checked="true"]{background:var(--tint);box-shadow:inset 0 0 0 2px var(--field)}
+.tier:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.tier .tn{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tier .tn b{font-family:var(--display);font-weight:700;font-size:1.2rem;letter-spacing:-.01em}
+.tier .tn span{font-size:.88rem;color:var(--muted)}
+.tier .tn .flag{font-size:.78rem;font-weight:600;color:var(--field)}
+.tier .tp{font-family:var(--display);font-weight:700;font-size:1.7rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tier .tp small{font-family:var(--text);font-size:.85rem;font-weight:500;color:var(--muted);letter-spacing:0}
+.freq{display:grid;grid-template-columns:1fr 1fr;background:var(--tint);border-radius:12px;padding:4px;gap:4px}
+.freq button{border:none;background:transparent;padding:10px;border-radius:9px;font-weight:600;color:var(--muted);cursor:pointer}
+.freq button[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--lift)}
+.included{display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--tint);border-radius:var(--r-md);font-size:.94rem}
+.included div{display:flex;gap:10px}
+.included svg{flex:none;color:var(--field);margin-top:3px}
+
+/* Agreement */
+.doc{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--lift);padding:20px 20px 8px;font-size:.93rem;line-height:1.6}
+.doc h3{font-family:var(--display);font-weight:700;font-size:1.25rem;margin:0 0 4px}
+.doc h4{font-size:.98rem;margin:18px 0 4px}
+.doc p{margin:0 0 8px}
+.doc ul{margin:0 0 8px;padding-left:1.15em}
+.terms{width:100%;border-collapse:collapse;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.terms td{padding:7px 0;border-bottom:.5px solid var(--hair);vertical-align:top}
+.terms td:last-child{text-align:right;font-weight:600;padding-left:12px;white-space:nowrap}
+.fields{display:flex;flex-direction:column;gap:12px}
+.fields label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.92rem}
+.fields input[type=text]{font:inherit;font-weight:400;padding:12px 14px;border-radius:var(--r-sm);border:0;background:var(--fill);color:var(--ink)}
+.fields input[type=text]:focus{outline:none;background:var(--surface);box-shadow:0 0 0 3px rgba(42,109,176,.18),0 0 0 1px var(--focus)}
+.check{display:grid!important;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;font-weight:400!important}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--field)}
+.signature{font-family:var(--display);font-size:1.6rem;font-weight:600;font-style:italic;border-bottom:1.5px solid var(--ink);padding:4px 2px;min-height:2.2em;color:var(--field)}
+
+/* Confirm */
+.ticket{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--lift);overflow:hidden}
+.ticket .top{padding:18px 18px 16px;background:#1e3a2f;color:#f2f1ec}
+.ticket .top b{font-family:var(--display);font-size:2.3rem;font-weight:750;letter-spacing:-.02em;display:block;line-height:1.05}
+.ticket .lines{padding:6px 18px 14px}
+.ticket .line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:.5px solid var(--hair);font-variant-numeric:tabular-nums}
+.ticket .line:last-child{border-bottom:none}
+.ticket .line span{color:var(--muted)}
+.code{font-weight:700;letter-spacing:.04em}
+.note{font-size:.86rem;color:var(--muted)}
+
+/* Action bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:12px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--hair)}
+.bar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.bar .tot{flex:1;min-width:0}
+.bar .tot span{display:block;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tot b{font-family:var(--display);font-size:1.7rem;font-weight:700;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.bar .tot b small{font-family:var(--text);font-size:.85rem;font-weight:500;color:var(--muted);letter-spacing:0}
+.go{border:none;cursor:pointer;background:var(--field);color:var(--field-ink);font-weight:600;font-size:1rem;padding:14px 22px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:transform .12s,filter .15s}
+.go:active{transform:scale(.97)}
+.go[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.hidden{display:none!important}
+.enter{animation:enter .28s ease-out both}
+@keyframes enter{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lawn .arcs,.enter{animation:none}.tog,.tog::after{transition:none}}
+
+/* Owner */
+.owner{background:var(--surface);border-radius:var(--r-md);box-shadow:var(--lift);padding:16px;display:flex;flex-direction:column;gap:12px;font-size:.9rem}
+.owner h2{font-size:1.3rem}
+.owner .warn{background:var(--tint);border-radius:var(--r-sm);padding:10px 12px}
+.otools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ob{font-weight:600;font-size:.86rem;background:transparent;color:var(--field);border:1.5px solid var(--field);border-radius:9px;padding:7px 11px;cursor:pointer}
+.ob.on{background:var(--field);color:var(--field-ink)}
+.ob:disabled{opacity:.4;cursor:not-allowed}
+.knobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.knobs label{display:flex;flex-direction:column;gap:3px;font-size:.74rem;color:var(--muted)}
+.knobs input{font:inherit;font-size:.86rem;padding:6px 8px;border:1px solid var(--hair);border-radius:7px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+.otable{overflow-x:auto;border:1px solid var(--hair);border-radius:10px}
+.otable table{border-collapse:collapse;width:100%;min-width:560px;font-size:.82rem;font-variant-numeric:tabular-nums}
+.otable th,.otable td{padding:6px 9px;border-bottom:.5px solid var(--hair);text-align:right;white-space:nowrap}
+.otable th:first-child,.otable td:first-child{text-align:left}
+.otable th{font-weight:600;color:var(--muted)}
+.m-ok{color:var(--field);font-weight:700}.m-mid{color:var(--straw);font-weight:700}.m-low{color:var(--danger);font-weight:700}
+.trace .aerial{cursor:crosshair}
+</style>
+</head>
+<body>
+
+
+<div class="app" id="app">
+  <header class="lawn" id="hero"><svg class="arcs" viewBox="0 0 200 200" aria-hidden="true"><path d="M20 200V120A100 100 0 0 1 120 20h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".55"/><path d="M66 200v-64a54 54 0 0 1 54-54h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".35"/><path d="M112 200v-34a8 8 0 0 1 8-8h80" fill="none" stroke="#d9d6c8" stroke-width="26" opacity=".18"/></svg>
+    <div class="mark"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M5 37V25A20 20 0 0 1 25 5h10" fill="none" stroke="#d9d6c8" stroke-width="6"/><path d="M14 37v-9a11 11 0 0 1 11-11h10" fill="none" stroke="#9fb89f" stroke-width="6"/><path d="M23 37v-4a3 3 0 0 1 3-3h9" fill="none" stroke="#6b8f71" stroke-width="6"/></svg><span class="wordmark"><b>GROUNDWORK</b><small>LANDSCAPE</small></span></div>
+    <h1>Never think about your yard again.</h1>
+    <p>You're not hiring someone to mow. We take over the whole yard, lawn, beds, weeds and leaves, and keep it right all year for one monthly price.</p>
+    <div class="tag">Property care, professionally done.</div>
+  </header>
+
+  <!-- Step 0: find -->
+  <section id="s0" class="enter">
+    <div class="find">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="addr" type="text" autocomplete="off" placeholder="Start with your house number" role="combobox" aria-label="Your address" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
+      <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+    </div>
+    <div class="offer" id="offer"></div>
+    <div class="modern">
+      <h2>Lawn care, run like a professional service</h2>
+      <p class="sub">If you pay a lawn company around $200 a month today, Complete Care costs about the same. The difference is you never think about the yard again.</p>
+      <div class="vs" role="table" aria-label="How we compare">
+        <div class="vsrow vshead" role="row"><span role="columnheader">The usual way</span><span role="columnheader">With us</span></div>
+        <div class="vsrow" role="row"><span role="cell">Call around and wait days for a quote</span><span role="cell">Your price in 30 seconds, from your actual lot</span></div>
+        <div class="vsrow" role="row"><span role="cell">Wondering when they'll come</span><span role="cell">See your spot on the schedule, then an on-the-way text</span></div>
+        <div class="vsrow" role="row"><span role="cell">Whoever shows up that day</span><span role="cell">Uniformed, background-checked crews, and you know who's coming</span></div>
+        <div class="vsrow" role="row"><span role="cell">Wonder whether they came this week</span><span role="cell">A text after every visit saying exactly what was done</span></div>
+        <div class="vsrow" role="row"><span role="cell">A different company for straw, leaves and aeration</span><span role="cell">One plan covers everything outside your house</span></div>
+        <div class="vsrow" role="row"><span role="cell">You spot the dead patch or the broken sprinkler</span><span role="cell">We spot it first and text you</span></div>
+        <div class="vsrow" role="row"><span role="cell">Texts that sit unanswered for days</span><span role="cell">A real answer <span class="reply"></span></span></div>
+        <div class="vsrow" role="row"><span role="cell">Invoices, checks and phone tag</span><span role="cell">One automatic payment a month</span></div>
+        <div class="vsrow" role="row"><span role="cell">A bad cut means calling and waiting</span><span role="cell">One reply, and we fix it free within 48 hours</span></div>
+      </div>
+    </div>
+    <div class="texts">
+      <h2>After every visit, a text</h2>
+      <p class="sub">You can see the cut from your driveway. What you can't see is what went on the lawn or what we noticed. So you get it in writing, every time, and you can reply to a real person.</p>
+      <div class="phone" role="img" aria-label="Example text messages from Groundwork">
+        <div class="who"><span class="av"><svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true"><path d="M5 37V25A20 20 0 0 1 25 5h10" fill="none" stroke="#d9d6c8" stroke-width="6"/><path d="M14 37v-9a11 11 0 0 1 11-11h10" fill="none" stroke="#9fb89f" stroke-width="6"/><path d="M23 37v-4a3 3 0 0 1 3-3h9" fill="none" stroke="#6b8f71" stroke-width="6"/></svg></span><b>Groundwork</b></div>
+        <div class="when">Wed 6:10 PM</div>
+        <div class="bub">We're at your place tomorrow, 2nd stop, likely 9 to 11am. Is the side gate unlocked?</div>
+        <div class="bub me">Yep, unlocked</div>
+        <div class="when">Thu 10:42 AM</div>
+        <div class="bub">Your lawn was cut today. Mowed, edged, trimmed and blown clean. One thing we noticed: the sprinkler head by the mailbox is cracked. Want us to fix it? About $35. Next visit: Thu, Nov 6.</div>
+        <div class="bub me">Yes please</div>
+        <div class="bub">Done. Added to next Thursday's visit.</div>
+        <div class="when">Mon 1:15 PM</div>
+        <div class="bub">Treatment 5 of 7 done today: pre-emergent and broadleaf weed control. Keep kids and pets off the lawn until it dries, about 2 hours. No need to water. Weeds will curl and brown over 7 to 10 days. Next treatment: early February.</div>
+      </div>
+    </div>
+    <div class="trust">
+      <h2>One company, one standard</h2>
+      <p class="sub" style="margin-top:-6px">Every visit is scheduled, checked and confirmed in writing by Groundwork. You have one number to text, and one company that answers for the result.</p>
+      <div class="badges">
+        <div class="badge"><b>Licensed</b><span id="licNote"></span></div>
+        <div class="badge"><b>Insured</b><span>General liability, certificate on request</span></div>
+        <div class="badge"><b>Checked crews</b><span>Uniformed and background-checked</span></div>
+        <div class="badge"><b>48-hour fix</b><span>Not right? We come back free</span></div>
+      </div>
+    </div>
+    <div class="plate">
+      <h2>What comes off your plate</h2>
+      <div class="promises">
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c1-5 2-9 3-12M10 20c.5-6 1.5-10 3-14M16 20c.5-5 1.5-8 3-11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The lawn</b><span>Mowed, edged and trimmed on schedule, fed and weeded seven times a year.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 12c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The beds</b><span>Fresh pine straw every spring and fall, so the front of the house always looks finished.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><div><b>The seasons</b><span>The leaves gone before you notice them, and aeration and overseeding added whenever your lawn needs it.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The worrying</b><span>Every visit we look over the whole yard. Dry spots, broken sprinkler heads, fire ants: you get a text and a fix before it becomes a problem.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The waiting</b><span>See every upcoming visit in your account, get a text when the crew is on the way, and know who's coming before they pull up.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><div><b>The chasing</b><span>Text your dedicated support line any time and get a real answer <span class="reply"></span>. Questions, skips, a gate code change: handled.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg></span><div><b>The admin</b><span>No calls to schedule, no invoices to chase. One payment a month, a text after every visit.</span></div></div>
+        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The risk</b><span>If anything isn't right, reply to your visit text and we fix it within 48 hours, free.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 1: build -->
+  <section id="s1" class="hidden" style="display:flex;flex-direction:column;gap:18px">
+    <div class="steprow"><button class="back" data-go="0" type="button"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Change address</button><span class="stepname">Step 1 of 3</span></div>
+    <div class="steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <div class="yard" id="yard">
+      <div class="aerial" id="aerial"><img id="aimg" alt=""><svg id="asvg" viewBox="0 0 480 480" aria-hidden="true"></svg><div class="scan"></div><div class="mload" id="mload" aria-live="polite"><div class="spin"></div><b id="mlTitle">Measuring your yard</b><span id="mlStep">Finding your property line</span></div><span class="pin" id="apin">2025 county aerial</span></div>
+      <div class="yardinfo">
+        <h3 id="yAddr"></h3>
+        <div class="bdown" id="bdown">
+          <div class="bbar" id="bbar" aria-hidden="true"></div>
+          <div class="chips" id="chips"></div>
+          <div class="eq" id="eq"></div>
+        </div>
+        <div class="measures" id="measOld"><div><span>Lot</span><b id="mLot"></b></div><div><span>Lawn</span><b id="mTurf"></b></div><div><span>Beds</span><b id="mBeds"></b></div></div>
+        <div class="legend" id="legOld"><span><i style="background:var(--clover)"></i>Your property line</span><span id="bedLegend"><i style="background:var(--straw)"></i>Measured beds</span></div>
+        <div class="note" id="bedNote"></div>
+        <div class="extra">
+          <b>Any beds we can't see from above?</b>
+          <p>Under a deck, behind the house, along a back fence. Add a rough size and your price updates.</p>
+          <div class="xseg" id="xseg" role="group" aria-label="Beds not visible from above"></div>
+        </div>
+      </div>
+    </div>
+    <div class="review hidden" id="review"><b>We’re double-checking this one.</b> Part of this yard was hard to read from the air, so a person reviews it. Your price is shown below and we’ll confirm it within the hour.</div>
+    <div><h2>Choose your coverage</h2><p class="sub">Three levels of coverage. Every one includes a text after each visit, a visible schedule, text support and the 48-hour redo.</p></div>
+    <div class="tiers" role="radiogroup" aria-label="Coverage">
+      <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The grass, done right every other week</span></span><span class="tp" id="pLawn"></span></button>
+      <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds and leaves</span></span><span class="tp" id="pComplete"></span></button>
+      <button class="tier" role="radio" data-tier="signature" type="button"><span class="tn"><b>Signature Care</b><span>Everything, weekly all summer, with flowers and shrubs</span></span><span class="tp" id="pSignature"></span></button>
+    </div>
+    <div class="lock"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="lockNote"></span></div>
+    <div class="included" id="incl"></div>
+    <div><h2 id="extrasHead"></h2><p class="sub" id="extrasSub"></p></div>
+    <div class="list" id="addons"></div>
+    <div><h2>Not ready to decide?</h2><p class="sub">Send this quote to whoever you decide with, or text us a question. The price stays the same.</p></div>
+    <div class="share" id="share"></div>
+  </section>
+
+  <!-- Step 2: agreement -->
+  <section id="s2" class="hidden" style="display:flex;flex-direction:column;gap:18px">
+    <div class="steprow"><button class="back" data-go="1" type="button"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Edit plan</button><span class="stepname">Step 2 of 3</span></div>
+    <div class="steps" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></div>
+    <div><h2>Review your service agreement</h2><p class="sub">Here's the short version. The full agreement is one tap below.</p></div>
+    <div class="short" id="short"></div>
+    <details id="full"><summary class="fine">Read the full agreement</summary><article class="doc" id="doc" style="margin-top:10px"></article></details>
+    <div class="fields">
+      <label>Your full name<input type="text" id="fname" autocomplete="name" placeholder="As it appears on the property"></label>
+      <div class="signature" id="sig" aria-live="polite"></div>
+      <label class="check"><input type="checkbox" id="agree"><span>I have read and agree to this service agreement.</span></label>
+      <label class="check"><input type="checkbox" id="texts"><span>Text me visit reminders and visit reports. Message and data rates may apply. Reply STOP to opt out.</span></label>
+    </div>
+  </section>
+
+  <!-- Step 3: confirm -->
+  <section id="s3" class="hidden" style="display:flex;flex-direction:column;gap:18px">
+    <div class="steprow"><button class="back" data-go="2" type="button"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back to agreement</button><span class="stepname">Step 3 of 3</span></div>
+    <div class="steps" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+    <div><h2>You're nearly set</h2><p class="sub">Finish in our secure checkout to sign and add a card. Nothing is charged until your first visit.</p></div>
+    <div class="ticket" id="ticket"></div>
+    <p class="note">Your plan code links this quote to your account at checkout. We'll schedule a free walk-through before the first visit to confirm your yard.</p>
+  </section>
+
+  <section class="owner hidden" id="owner"></section>
+</div>
+
+<div class="bar hidden" id="bar"><div class="in"><div class="tot"><span id="barLabel"></span><b id="barAmt"></b></div><a class="go" id="go" role="button" tabindex="0"></a></div></div>
+
+<script>
+/* ---------- Business setup ---------- */
+const BUSINESS={replyPromise:"within an hour, 7am to 7pm, seven days a week",name:"Groundwork Landscape",legal:"Groundwork Landscape LLC",phone:"[phone]",email:"[email]",bookingUrl:"",seasonStart:"March 2027",license:"[GA pesticide contractor license #]",
+
+ founding:{spots:100,claimed:0,deadline:"2026-12-31",lockedThrough:"the end of 2028"},
+ fallStarter:{on:true,price:150,by:"2026-11-30"}};
+const hasPhone=!/^\[/.test(BUSINESS.phone);
+const fmtDate=d=>new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+const foundingOpen=()=>new Date()<=new Date(BUSINESS.founding.deadline+"T23:59:59")&&BUSINESS.founding.claimed<BUSINESS.founding.spots;
+function quoteGoodThrough(){const d30=new Date(Date.now()+30*864e5),dl=new Date(BUSINESS.founding.deadline+"T12:00:00");const d=foundingOpen()&&dl>d30?dl:d30;return d.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
+/* Live measurements: Supabase. The publishable key is safe to ship in a web page; row-level security limits it to reading measured homes. */
+const DB={url:"https://sbkofbgmvrzpruupmsnl.supabase.co",key:"sb_publishable_ZEOiazTsvKX-GfoQhqhj6g_uPcSibe8"};
+const IMG={};
+function rowToL(r){const g=r.geo||{},lot=100000+r.id;IMG[lot]=DB.url+"/storage/v1/object/public/aerials/"+r.image_path;
+  return [r.address,lot,r.land_sqft||Math.round(r.lawn_sqft+r.beds_sqft+r.hard_sqft+r.house_sqft+(g.woods_sqft||0)),g.mpp,g.ring,{h:g.h,d:g.d,b:g.b,w:g.w||[],p:g.p,woods:g.woods_sqft||0,review:r.status==="needs_review",a:[r.house_sqft,r.hard_sqft,r.beds_sqft,r.lawn_sqft]}]}
+async function dbGet(q){const r=await fetch(DB.url+"/rest/v1/properties?"+q,{headers:{apikey:DB.key,Authorization:"Bearer "+DB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
+const SEL="select=id,address,land_sqft,lawn_sqft,beds_sqft,hard_sqft,house_sqft,geo,image_path,status";
+const FUNC=DB.url+"/functions/v1/measure";
+const fhead={apikey:DB.key,"Content-Type":"application/json"};
+const LOTS=[];   // [address, lot #, lot sq ft, meters per image pixel, property line in image px]
+const BEDS_MEASURED={}; // lot # -> bed sq ft, traced in owner view
+const DEF={nonTurf:3700,bedDefault:600,pBase:32.5,pPpk:5.85,sBase:15,sPpk:3,tBase:32.5,tPpk:6.5,tLab:12,tMat:1.6,rounds:7,cBi:17,cWk:24,ovh:6,stress:8,
+ strawSqftPerBale:45,strawPerBale:6.5,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:55,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2};
+
+const OWNER=location.hash==="#owner";
+const EMBED=/[?&]embed=1/.test(location.search)&&window.parent!==window;
+if(EMBED)document.documentElement.classList.add("embed");
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let K={...DEF,...(OWNER?store.get("bq4-knobs",{}):{})};
+let traced=OWNER?store.get("bq3-beds",{}):{};
+const $=id=>document.getElementById(id);
+const usd=v=>"$"+Math.round(v).toLocaleString("en-US");
+const usd2=v=>"$"+v.toFixed(2);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+document.querySelectorAll(".reply").forEach(e=>e.textContent=BUSINESS.replyPromise);
+(function staticFill(){
+  const F=BUSINESS.founding,left=F.spots-F.claimed;
+  const fall=BUSINESS.fallStarter.on&&new Date()<=new Date(BUSINESS.fallStarter.by+"T23:59:59");
+  $("offer").innerHTML=foundingOpen()?`<span class="k">Founding members</span><b>The first ${F.spots} homes lock their price through ${F.lockedThrough}.</b><span>No increase at your first renewal. ${left} of ${F.spots} spots left. Offer ends ${fmtDate(F.deadline)}.${fall?` Want to try us first? Sign up by ${fmtDate(BUSINESS.fallStarter.by)} and we'll do a leaf cleanup this fall for ${usd(BUSINESS.fallStarter.price)}.`:""}</span><div class="meter" aria-hidden="true"><i style="width:${Math.max(4,F.claimed/F.spots*100)}%"></i></div>`:"";
+  $("offer").classList.toggle("hidden",!foundingOpen());
+  $("licNote").textContent=/^\[/.test(BUSINESS.license)?"Georgia commercial pesticide contractor":"Georgia pesticide contractor #"+BUSINESS.license;
+})();
+
+/* ---------- Pricing engine ---------- */
+function beds(lot){const t=traced[lot];if(t&&t.length)return{sq:t.reduce((s,b)=>s+b.sqft,0),measured:true};if(BEDS_MEASURED[lot])return{sq:BEDS_MEASURED[lot],measured:true};return{sq:K.bedDefault,measured:false}}
+function geoOf(L){const g=L[5],X=L===cur?xb:0;if(!g)return null;const t=traced[L[1]],tb=t&&t.length?t.reduce((s,b)=>s+b.sqft,0):null;
+  const [house,hard,gb,lawn]=g.a,bedsSq=(tb!=null?tb:gb)+X,lawnSq=Math.max(1500,lawn+gb-bedsSq);const woods=g.woods||0;return{house,hard,beds:bedsSq,lawn:lawnSq,woods,lot:house+hard+bedsSq+lawnSq+woods,traced:tb!=null,extra:X}}
+function quote(L){
+  const [addr,lot,lotSq]=L,geo=geoOf(L),b=geo?{sq:geo.beds,measured:true}:(o=>({sq:o.sq+(L===cur?xb:0),measured:o.measured}))(beds(lot)),turf=geo?geo.lawn:Math.max(2500,lotSq-K.nonTurf-b.sq),k=turf/1000;
+  const cut=K.pBase+K.pPpk*k,sub=K.sBase+K.sPpk*k,trt=K.tBase+K.tPpk*k,trtCost=K.tLab+K.tMat*k;
+  const plan=(c,id,name)=>{const mo=Math.round((c*cut+K.rounds*trt)/12/5)*5,rev=mo*12,cost=c*sub+K.rounds*trtCost+rev*K.ovh/100;return{id,name,visits:c,mo,rev,margin:(rev-cost)/rev,stress:(rev-cost-c*K.stress)/rev}};
+  const bales=Math.ceil(b.sq/K.strawSqftPerBale),yards=Math.ceil(b.sq/K.mulchSqftPerYard*2)/2;
+  const add=[
+    {id:"straw",name:"Pine straw",d:`${bales} bales, refreshed spring and fall`,unit:`${usd2(K.strawPerBale)} per bale installed`,year:bales*K.strawPerBale*K.strawInstalls,sched:"March and October"},
+    {id:"mulch",name:"Hardwood mulch instead of straw",d:`${yards} cubic yards at 3 inches, once a year`,unit:`${usd(K.mulchPerYard)} per cubic yard installed`,year:yards*K.mulchPerYard,sched:"March"},
+    {id:"color",name:"Seasonal flowers",d:`${K.colorFlats} flats in your front beds, spring and fall`,unit:`${usd(K.colorPerFlat)} per flat installed`,year:K.colorFlats*K.colorPerFlat*K.colorRotations,sched:"April and October"},
+    {id:"aer",name:"Aeration and overseeding",d:"Once a year in the fall, timed to your grass type",unit:"Priced to your lawn size",year:K.aerBase+K.aerPpk*k,sched:"Timed to grass type"},
+    {id:"shrub",name:"Shrub trimming",d:`${K.shrubVisits} visits, spring and late summer`,unit:`${usd(K.shrubVisit)} per visit`,year:K.shrubVisit*K.shrubVisits,sched:"May and August"},
+    {id:"leaf",name:"Leaf cleanup",d:`${K.leafVisits} visits in late fall`,unit:`${usd(K.leafVisit)} per visit`,year:K.leafVisit*K.leafVisits,sched:"November and December"}];
+  add.forEach(a=>a.mo=Math.round(a.year/12));
+  return{addr,lot,lotSq,turf,beds:b,geo,cut,trt,plans:{bi:plan(K.cBi,"bi","Every other week"),wk:plan(K.cWk,"wk","Weekly in summer")},add};
+}
+
+/* ---------- State ---------- */
+let cur=null,step=0,planId="bi",tier="complete",on=new Set(),q=null,xb=0;
+const TIERS={lawn:{name:"Lawn Care",freq:"bi",core:[]},complete:{name:"Complete Care",freq:"bi",core:["straw","leaf"]},signature:{name:"Signature Care",freq:"wk",core:["straw","leaf","color","shrub"]}};
+function coreFor(qq,t){let ids=TIERS[t].core.slice();if(on.has("mulch")&&ids.includes("straw"))ids=ids.map(i=>i==="straw"?"mulch":i);return qq.add.filter(a=>ids.includes(a.id))}
+function tierPrice(qq,t){return qq.plans[TIERS[t].freq].mo+coreFor(qq,t).reduce((s,a)=>s+a.mo,0)}
+function chosen(){planId=TIERS[tier].freq;const p=q.plans[planId],core=coreFor(q,tier),hasBeds=TIERS[tier].core.includes("straw");
+  const ex=q.add.filter(a=>on.has(a.id)&&!core.includes(a)&&!(hasBeds&&(a.id==="mulch"||a.id==="straw")));
+  return{p,core,ex,name:TIERS[tier].name,mo:p.mo+core.reduce((s,a)=>s+a.mo,0)+ex.reduce((s,a)=>s+a.mo,0)}}
+function planCode(){const parts=["BP",q.lot,{lawn:"L",complete:"C",signature:"S"}[tier],...chosen().ex.map(a=>({straw:"S",mulch:"M",color:"F",aer:"A",leaf:"L",shrub:"T"})[a.id]),...(xb?["B"+xb]:[])];return parts.join("-")}
+
+function go(n){step=n;
+  ["s0","s1","s2","s3"].forEach((id,i)=>{$(id).classList.toggle("hidden",i!==n);if(i===n){$(id).classList.remove("enter");void $(id).offsetWidth;$(id).classList.add("enter")}});
+  $("app").classList.toggle("compact",n>0);$("bar").classList.toggle("hidden",n===0);
+  render();try{window.scrollTo({top:0,behavior:"instant"})}catch(e){window.scrollTo(0,0)}}
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
+
+function render(){
+  if(!cur)return;q=quote(cur);const c=chosen();
+  // step 1
+  $("yAddr").textContent=q.addr;
+  $("mLot").textContent=(q.lotSq/43560).toFixed(2)+" acre";
+  $("mTurf").textContent=(Math.round(q.turf/100)*100).toLocaleString("en-US")+" sq ft";
+  $("mBeds").textContent=(Math.round(q.beds.sq/10)*10).toLocaleString("en-US")+" sq ft";
+  $("bedLegend").classList.toggle("hidden",!(traced[q.lot]&&traced[q.lot].length));
+  $("bedNote").textContent=q.geo?"Measured from Cobb County's 2025 aerial, your property line and your home's footprint. We confirm it on your free walk-through.":(q.beds.measured?"Bed area measured from the county aerial.":"Bed area is a typical estimate for homes like yours. We confirm it on your free walk-through.");
+  renderBreakdown();
+  $("review").classList.toggle("hidden",!(cur[5]&&cur[5].review));
+  $("xseg").innerHTML=[[0,"None",""],[100,"Small","~100 sq ft"],[250,"Medium","~250 sq ft"],[500,"Large","~500 sq ft"]].map(([v,n,d])=>`<button type="button" data-x="${v}" aria-pressed="${xb===v}">${n}${d?`<small>${d}</small>`:""}</button>`).join("");
+  ["lawn","complete","signature"].forEach(t=>$("p"+t[0].toUpperCase()+t.slice(1)).innerHTML=usd(tierPrice(q,t))+"<small> /mo</small>");
+  document.querySelectorAll(".tier").forEach(o=>o.setAttribute("aria-checked",o.dataset.tier===tier));
+  const tick='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const inc=[`Mowing, trimming, edging and blowing, ${planId==="bi"?"every other week":"weekly May to September"}`,`${K.rounds} rounds of fertilizer and weed control`];
+  const T=TIERS[tier].core;
+  if(T.includes("straw")){const bb=q.add.find(a=>a.id===(on.has("mulch")?"mulch":"straw"));inc.push(on.has("mulch")?`Hardwood mulch refreshed once a year (${bb.d.split(",")[0]})`:`Pine straw refreshed spring and fall (${bb.d.split(",")[0]})`,"Leaf cleanup, two visits in late fall")}
+  if(T.includes("color"))inc.push(`Seasonal flowers in your front beds, spring and fall`,`Shrub trimming twice a year`);
+  inc.push("Your visits on a schedule you can see, with on-the-way texts",`Dedicated text support, answered ${BUSINESS.replyPromise}`,"A full-yard check every visit, with a text of what we did and saw","Free fix within 48 hours if anything isn't right");
+  $("incl").innerHTML=inc.map(t=>`<div>${tick}${t}</div>`).join("");
+  $("lockNote").innerHTML=`<b>This price is locked.</b> It holds after the walk-through unless we find beds or lawn the aerial can't see, and we'll show you any change before your first charge${foundingOpen()?`, and as a founding member it holds through ${BUSINESS.founding.lockedThrough}`:""}. Quote good through ${quoteGoodThrough()}.`;
+  renderShare(c);
+  const avail=q.add.filter(a=>!T.includes(a.id)&&!(T.includes("straw")&&a.id==="straw"));
+  $("extrasHead").textContent=tier==="lawn"?"Add more of the yard":"Make it yours";
+  $("extrasSub").textContent=avail.length?"Optional, priced from your yard and spread into your monthly payment.":"";
+  const shown=avail;
+  $("addons").classList.toggle("hidden",!shown.length);$("extrasHead").parentElement.classList.toggle("hidden",!shown.length);
+  $("addons").innerHTML=shown.map(a=>`<label class="row"><span><b>${a.name}</b><span class="d">${a.d}</span></span><span class="amt">+${usd(a.mo)}/mo<small>${usd(a.year)} a year</small></span><input type="checkbox" class="tog" data-id="${a.id}" ${on.has(a.id)?"checked":""} aria-label="Add ${a.name}"></label>`).join("");
+  // bar
+  const labels=["","Review agreement","Continue","Go to secure checkout"];
+  $("barLabel").textContent=c.name+(c.ex.length?` + ${c.ex.length} extra${c.ex.length>1?"s":""}`:"");
+  $("barAmt").innerHTML=usd(c.mo)+"<small> /mo</small>";
+  const g=$("go");g.textContent=labels[step]||"";
+  const blocked=(step===2&&!canAgree())||(step===3&&!BUSINESS.bookingUrl&&!EMBED);
+  g.setAttribute("aria-disabled",blocked?"true":"false");
+  if(step===3&&BUSINESS.bookingUrl){g.href=BUSINESS.bookingUrl;g.target="_blank";g.rel="noopener"}else{g.removeAttribute("href");g.removeAttribute("target")}
+  if(step===3&&!BUSINESS.bookingUrl)g.textContent=EMBED?"Start service":"Checkout opens soon";
+  if(step===2){renderShort();renderDoc()}
+  if(step===3)renderTicket();
+  if(OWNER)renderOwner();
+}
+function canAgree(){return $("fname").value.trim().length>3&&$("agree").checked}
+$("go").addEventListener("click",e=>{if($("go").getAttribute("aria-disabled")==="true"){e.preventDefault();return}if(step<3){e.preventDefault();go(step+1);return}
+  if(EMBED&&!BUSINESS.bookingUrl){e.preventDefault();const c=chosen();try{window.parent.postMessage({type:"gw-sign",lot:q.lot,addr:q.addr,tier,mo:c.mo,code:planCode(),name:$("fname").value.trim(),texts:$("texts").checked,extras:c.ex.map(a=>a.id),xb},"*")}catch(err){}}});
+$("go").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("go").click()}});
+document.querySelectorAll(".tier").forEach(o=>o.addEventListener("click",()=>{tier=o.dataset.tier;render()}));
+$("addons").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
+$("fname").addEventListener("input",()=>{$("sig").textContent=$("fname").value;render()});
+$("agree").addEventListener("change",render);
+
+/* ---------- Share ---------- */
+function quoteUrl(){return location.href.split("#")[0]+"#lot-"+q.lot}
+function renderShare(c){
+  const msg=`Lawn quote for ${q.addr}: ${c.name}, ${usd(c.mo)}/mo, price locked. ${quoteUrl()}`;
+  const ask=`Hi Groundwork, I'm at ${q.addr}. I'm looking at ${c.name} (${usd(c.mo)}/mo) and had a question: `;
+  const sms=b=>"sms:?&body="+encodeURIComponent(b);
+  $("share").className="share"+(hasPhone?"":" one");
+  $("share").innerHTML=`<button class="sbtn" type="button" id="shareBtn"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Text this quote</button>`+
+   (hasPhone?`<a class="sbtn" href="sms:${encodeURIComponent(BUSINESS.phone)}?&body=${encodeURIComponent(ask)}">Text us a question</a>`:"");
+  $("shareBtn").onclick=async()=>{
+    if(navigator.share){try{await navigator.share({title:"Groundwork quote",text:`Lawn quote for ${q.addr}: ${c.name}, ${usd(c.mo)}/mo, price locked.`,url:quoteUrl()});return}catch(e){if(e&&e.name==="AbortError")return}}
+    if(/iPhone|iPad|Android/i.test(navigator.userAgent)){location.href=sms(msg);return}
+    try{await navigator.clipboard.writeText(msg);toast("Quote link copied")}catch(e){toast("Copy this link: "+quoteUrl())}
+  };
+}
+function toast(t){const d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+function renderShort(){
+  const c=chosen();
+  $("short").innerHTML=`<h3>The short version</h3><ul>
+   <li><b>${usd(c.mo)} a month</b>, the same every month, charged on the 1st once service starts in ${esc(BUSINESS.seasonStart)}. Nothing is charged before your first visit.</li>
+   <li><b>Your price holds after the walk-through,</b> unless we find beds or lawn the aerial can't see, like under a deck. You'd see any change before your first charge and can say no.</li>
+   <li><b>12 months, then it renews.</b> We tell you 30 days ahead about any price change${foundingOpen()?`; as a founding member there won't be one through ${BUSINESS.founding.lockedThrough}`:""}.</li>
+   <li><b>Cancel anytime with 30 days' notice.</b> If you leave mid-year, we settle up so you've paid for exactly the work done, no more and no less.</li>
+   <li><b>Not right? Reply within 48 hours</b> and we come back and fix it free.</li>
+   <li><b>A text after every visit</b> and before every treatment. Reply STOP anytime.</li>
+  </ul>`;
+}
+
+/* ---------- Agreement ---------- */
+function renderDoc(){
+  const c=chosen(),p=c.p,today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  const coreRows=c.core.map(a=>`<tr><td>${a.name}<br><span class="note">${a.d}. ${a.unit}. ${a.sched}.</span></td><td>Included</td></tr>`).join("");
+  const exRows=c.ex.map(a=>`<tr><td>${a.name}<br><span class="note">${a.d}. ${a.unit}. ${a.sched}.</span></td><td>${usd(a.mo)}/mo</td></tr>`).join("");
+  $("doc").innerHTML=`
+  <h3>${TIERS[tier].name} Service Agreement</h3>
+  <p class="note">Between ${esc(BUSINESS.legal)} (“we”) and the property owner named below (“you”) for <b>${esc(q.addr)}, Kennesaw, GA 30152</b>. Prepared ${today}.</p>
+  <h4>1. Your plan</h4>
+  <table class="terms"><tr><td>${c.name}<br><span class="note">${p.name}: about ${p.visits} mowing visits and ${K.rounds} lawn treatments a year</span></td><td>${c.core.length?"":usd(p.mo)+"/mo"}</td></tr>${coreRows}${exRows}<tr><td><b>Monthly payment</b></td><td>${usd(c.mo)}/mo</td></tr><tr><td>Term</td><td>12 months</td></tr></table>
+  <h4>2. What each mowing visit includes</h4>
+  <p>Mowing of all lawn areas, string trimming around beds, fences and structures, edging along driveways, walks and curbs, and blowing clippings off hard surfaces. We mow at the height recommended for your grass type and season.</p>
+  <h4>3. Lawn treatments</h4>
+  <p>${K.rounds} rounds a year of fertilizer, pre-emergent and post-emergent weed control, applied by or under the supervision of a Georgia-licensed commercial pesticide applicator (${esc(BUSINESS.license)}). We follow every product label. We will text you before each treatment; keep children and pets off treated areas until the product has dried, as the label directs.</p>
+  <h4>4. Schedule and weather</h4>
+  <p>Service begins in ${esc(BUSINESS.seasonStart)}, after a free walk-through. Your upcoming visits are visible in your online account, and we text you when the crew is on the way. Every crew wears our uniform, and every crew member has passed a background check. Visit frequency follows grass growth: lighter in early spring and late fall, heavier in summer. If rain or unsafe conditions prevent a visit, we reschedule it within 3 business days and text you the new date.</p>
+  <h4>5. Watching the whole yard</h4>
+  <p>On every visit we look over the entire yard, not only the lawn. If we see a problem such as a dry spot, a broken sprinkler head, disease, insects or fire ants, we text you what we found, with a photo when it helps, and a recommendation. Repairs outside this plan are quoted first and done only with your approval.</p>
+  <h4>6. Our quality promise</h4>
+  <p>We text you after every visit with what was done. If you are not satisfied with a visit, reply within 48 hours and we will return to fix it at no charge.</p>
+  <h4>7. Payment</h4>
+  <p>You pay ${usd(c.mo)} each month by card or bank account on file, charged on the 1st, starting the month of your first visit. The monthly amount is the same in busy and quiet months; it spreads the year's services evenly. If a payment fails, we will notify you and may pause service until it is resolved.</p>
+  <h4>8. Term, renewal and cancellation</h4>
+  <p>This agreement runs 12 months and renews for another 12 months unless either of us gives 30 days' written notice before the renewal date. We will tell you about any price change at least 30 days before renewal.${foundingOpen()?` Founding-member price lock: if you sign by ${fmtDate(BUSINESS.founding.deadline)}, your monthly price will not increase before ${BUSINESS.founding.lockedThrough}, except for services you add.`:""} Your quoted price is based on the lawn and bed areas measured from the county aerial${xb?` plus about ${xb} square feet of beds you told us about`:""}. It will not change after the free walk-through unless we find lawn or beds that could not be seen from the air, such as under a deck. If so, we will show you the change before your first charge, and you may decline that item or cancel without charge.</p>
+  <p>You may cancel at any time with 30 days' written notice. Because the monthly price spreads the season's work evenly, if you cancel before 12 payments we compare what you have paid with the value of services already delivered at standard per-visit rates: ${usd2(q.cut)} per mowing visit, ${usd2(q.trt)} per treatment, and the add-on prices listed above. If services delivered exceed payments made, you pay the difference; if payments exceed services, we refund it. This balance never exceeds your remaining monthly payments.</p>
+  <h4>9. Access and your property</h4>
+  <p>Please keep gates unlocked on service days and pets indoors. Tell us about irrigation heads, invisible pet fences, lighting and anything else in the lawn. We are not responsible for damage to items that were not marked or disclosed. Report any damage you believe we caused within 72 hours with photos, and we will inspect and make it right where we are at fault. We carry general liability insurance and will provide a certificate on request.</p>
+  <h4>10. Support and messages</h4>
+  <p>Text or call our support line at ${esc(BUSINESS.phone)} at any time. We answer ${esc(BUSINESS.replyPromise)}; messages that arrive outside those hours are answered by 8am the next morning. With your consent below, we will text visit reminders, treatment notices and visit reports to the number on your account. Reply STOP at any time to stop texts.</p>
+  <h4>11. General</h4>
+  <p>This agreement is governed by Georgia law. It is the whole agreement between us for these services and can be changed only in writing. Questions: ${esc(BUSINESS.phone)} or ${esc(BUSINESS.email)}.</p>`;
+}
+function renderTicket(){
+  const c=chosen();
+  $("ticket").innerHTML=`<div class="top"><span>${esc(q.addr)}</span><b>${usd(c.mo)}<span style="font-size:1rem;font-weight:500"> /mo</span></b><span>12-month agreement, billed monthly</span></div>
+  <div class="lines">
+    <div class="line"><span>Signed by</span><b>${esc($("fname").value.trim())}</b></div>
+    <div class="line"><span>Coverage</span><b>${c.name}</b></div>${c.core.map(a=>`<div class="line"><span>${a.name}</span><b>Included</b></div>`).join("")}
+    ${c.ex.map(a=>`<div class="line"><span>${a.name}</span><b>${usd(a.mo)}/mo</b></div>`).join("")}
+    ${xb?`<div class="line"><span>Beds you added</span><b>~${xb} sq ft</b></div>`:""}
+    <div class="line"><span>Service starts</span><b>${esc(BUSINESS.seasonStart)}</b></div>
+    ${foundingOpen()?`<div class="line"><span>Price locked through</span><b>${BUSINESS.founding.lockedThrough.replace("the end of ","")}</b></div>`:""}
+    <div class="line"><span>Text updates</span><b>${$("texts").checked?"Yes":"No"}</b></div>
+    <div class="line"><span>Plan code</span><b class="code">${planCode()}</b></div>
+  </div>`;
+}
+
+/* ---------- Aerial ---------- */
+let tracing=false,draft=[];
+const LAYERS_ALL=[["lawn","Lawn we mow and treat","#8fc46a"],["beds","Planting beds","#a87a4f"],["hard","Driveway and walks","#d9d6c8"],["house","House","#4a4a45"],["woods","Woods, not mowed","#2f5d3a"]];
+let LAYERS=LAYERS_ALL.slice(0,4);
+let focus=null,animLot=null;
+const fmt=v=>Math.round(v).toLocaleString("en-US");
+function renderBreakdown(){
+  const g=q.geo;$("bdown").classList.toggle("hidden",!g);$("measOld").classList.toggle("hidden",!!g);$("legOld").classList.toggle("hidden",!!g&&!OWNER);
+  if(!g)return;
+  const v={lawn:g.lawn,beds:g.beds,hard:g.hard,house:g.house,woods:g.woods};LAYERS=LAYERS_ALL.filter(l=>l[0]!=="woods"||g.woods>0);
+  $("bbar").innerHTML=LAYERS.map(([k,,c])=>`<i style="width:${(v[k]/g.lot*100).toFixed(1)}%;background:${c}"></i>`).join("");
+  $("chips").innerHTML=LAYERS.map(([k,n,c])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${focus===k}"><i style="background:${c}"></i><span>${n}</span><b data-n="${Math.round(v[k])}">${fmt(v[k])} sq ft</b></button>`).join("");
+  $("eq").innerHTML=`<b>${fmt(g.lawn)} sq ft of lawn</b> = ${fmt(g.lot)} sq ft lot − ${fmt(g.house)} house − ${fmt(g.hard)} driveway and walks − ${fmt(g.beds)} beds${g.traced?" (traced)":""}${g.woods?` − ${fmt(g.woods)} woods`:""}${g.extra?`, including ${fmt(g.extra)} you added`:""}. Your price is built from these numbers.`;
+}
+$("xseg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;xb=+b.dataset.x;render()});
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;focus=focus===b.dataset.k?null:b.dataset.k;$("asvg").setAttribute("class",focus?"f-"+focus:"");renderBreakdown()});
+function countUp(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const els=[...document.querySelectorAll("#chips b")],t0=performance.now()+500,D=1500;
+  (function f(t){const p=Math.min(1,Math.max(0,(t-t0)/D)),e=1-Math.pow(1-p,3);els.forEach(b=>b.textContent=fmt(+b.dataset.n*e)+" sq ft");if(p<1)requestAnimationFrame(f)})(performance.now())}
+function bigLabel(rings){let best=null,ba=0;for(const r of rings){let a=0,cx=0,cy=0;for(let i=0;i<r.length;i++){const[x1,y1]=r[i],[x2,y2]=r[(i+1)%r.length],f=x1*y2-x2*y1;a+=f;cx+=(x1+x2)*f;cy+=(y1+y2)*f}if(Math.abs(a)>ba&&a){ba=Math.abs(a);best=[cx/(3*a),cy/(3*a)]}}return best}
+function tag(p,label,dy){if(!p)return"";const w=label.length*7+16;let x=Math.min(472-w,Math.max(8,p[0]-w/2)),y=Math.min(462,Math.max(18,p[1]+(dy||0)));return`<g class="tag"><rect x="${x}" y="${y-14}" width="${w}" height="20" rx="10"/><text x="${x+8}" y="${y}">${label}</text></g>`}
+function drawAerial(){
+  const [,lot,,,ring]=cur;$("aimg").src=IMG[lot]||"img/"+lot+".jpg";$("aimg").alt="Aerial view of "+cur[0];
+  const G=cur[5];
+  if(G){
+    const tb=traced[lot]&&traced[lot].length,pts=a=>a.map(p=>p.join(",")).join(" ");
+    const bedsP=tb?traced[lot].map(b=>b.pts):G.b,poly=(a,attr)=>a.map(p=>`<polygon points="${pts(p)}" ${attr}/>`).join("");
+    const d=draft.length?`<polyline points="${draft.join(" ")}" fill="none" stroke="#c9a46a" stroke-width="2.5" stroke-dasharray="6 5"/>${draft.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#c9a46a" stroke="#fff" stroke-width="1.5"/>`).join("")}`:"";
+    const qq=quote(cur),g=qq.geo,P=G.p||[];
+    $("asvg").innerHTML=`<defs>
+      <pattern id="mow" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(32)"><rect width="11" height="22" fill="rgba(150,214,110,.5)"/><rect x="11" width="11" height="22" fill="rgba(110,180,85,.38)"/></pattern>
+      <pattern id="straw" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(20)"><rect width="6" height="6" fill="rgba(150,96,52,.82)"/><path d="M0 3h6" stroke="rgba(214,160,100,.7)" stroke-width="1"/></pattern>
+      <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(20,22,20,.35)"/><path d="M0 0v7" stroke="rgba(255,255,255,.35)" stroke-width="1.4"/></pattern>
+      <mask id="lm"><polygon points="${pts(ring)}" fill="#fff"/><polygon points="${pts(G.h)}" fill="#000"/>${poly(G.d,'fill="#000"')}${poly(bedsP,'fill="#000"')}${poly(G.w||[],'fill="#000"')}</mask>
+      <pattern id="woods" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="8" height="8" fill="rgba(25,55,35,.55)"/><path d="M0 0v8" stroke="rgba(160,200,150,.45)" stroke-width="1.6"/></pattern>
+    </defs>
+    <g class="lyr L-lawn" mask="url(#lm)"><rect class="sweep" width="480" height="480" fill="url(#mow)"/></g>
+    <g class="lyr L-woods">${poly(G.w||[],'fill="url(#woods)" stroke="#9fb89f" stroke-width="1.2" stroke-dasharray="4 3" stroke-linejoin="round"')}</g>
+    <g class="lyr L-hard">${poly(G.d,'fill="rgba(235,232,220,.62)" stroke="#f2f1ec" stroke-width="1.5" stroke-linejoin="round"')}</g>
+    <g class="lyr L-beds">${poly(bedsP,'fill="url(#straw)" stroke="#e0b47a" stroke-width="1.5" stroke-linejoin="round"')}</g>
+    <g class="lyr L-house"><polygon points="${pts(G.h)}" fill="url(#hatch)" stroke="#f2f1ec" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round"/></g>
+    <polygon class="ring" pathLength="1" points="${pts(ring)}" fill="none" stroke="#f2f1ec" stroke-width="3" stroke-linejoin="round"/>
+    <g class="tags">${tag(P[0],"Lawn "+fmt(g.lawn)+" sq ft")}${tag(P[1],"House")}${tag(tb?null:P[3],"Beds "+fmt(g.beds),14)}${G.w&&G.w.length&&g.woods>300?tag(bigLabel(G.w),"Woods, not mowed"):""}</g>${d}`;
+    $("asvg").setAttribute("class",focus?"f-"+focus:"");
+    if(animLot!==lot){animLot=lot;const a=$("aerial");a.classList.remove("run");void a.offsetWidth;a.classList.add("run");const pin=$("apin");pin.textContent="Measuring your yard";pin.classList.add("busy");
+      clearTimeout(drawAerial.t);drawAerial.t=setTimeout(()=>{pin.textContent="Measured from 2025 county aerial";pin.classList.remove("busy")},2100);requestAnimationFrame(countUp)}
+    return;
+  }
+  $("apin").textContent="2025 county aerial";$("apin").classList.remove("busy");
+  const bedPolys=(traced[lot]||[]).map(b=>`<polygon points="${b.pts.join(" ")}" fill="rgba(140,111,78,.42)" stroke="#c9a46a" stroke-width="2.5" stroke-linejoin="round"/>`).join("");
+  const d=draft.length?`<polyline points="${draft.join(" ")}" fill="none" stroke="#c9a46a" stroke-width="2.5" stroke-dasharray="6 5"/>${draft.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#c9a46a" stroke="#fff" stroke-width="1.5"/>`).join("")}`:"";
+  $("asvg").innerHTML=`<polygon points="${ring.join(" ")}" fill="rgba(217,214,200,.16)" stroke="#f2f1ec" stroke-width="3.5" stroke-linejoin="round"/>${bedPolys}${d}`;
+}
+$("aerial").addEventListener("click",e=>{if(!tracing)return;const r=$("asvg").getBoundingClientRect();draft.push([Math.round((e.clientX-r.left)/r.width*480),Math.round((e.clientY-r.top)/r.height*480)]);drawAerial();renderOwner()});
+
+/* ---------- Address search ---------- */
+const input=$("addr"),list=$("sugg");let hits=[],sel=-1;
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\b(nw|drive|dr|lane|ln|point|pt|court|ct|lot)\b/g,"").replace(/\s+/g," ").trim();
+const IDX=LOTS.map(l=>norm(l[0]).split(" "));
+let st=null,seq=0;
+function search(){if(DB.key){clearTimeout(st);st=setTimeout(searchDB,180);return}const s=norm(input.value);sel=-1;if(!s){close();return}const w=s.split(" ");
+  hits=LOTS.filter((l,i)=>w.every(x=>IDX[i].some(t=>t.startsWith(x)))).slice(0,8);showHits()}
+async function searchDB(){const raw=input.value.replace(/[^A-Za-z0-9 ]/g," ").replace(/\s+/g," ").trim();sel=-1;if(raw.length<3||!/^\d+ \S/.test(raw)){close();return}
+  const my=++seq;let rows=[];try{const r=await fetch(FUNC+"?q="+encodeURIComponent(raw),{headers:fhead});rows=r.ok?await r.json():[]}catch(e){rows=[]}
+  if(my!==seq)return;hits=rows;showHits()}
+function showHits(){
+  list.innerHTML=hits.length?hits.map((l,j)=>Array.isArray(l)?`<li role="option" id="o${j}" data-j="${j}" aria-selected="false"><span>${esc(l[0])}</span><small>${(l[2]/43560).toFixed(2)} acre</small></li>`:`<li role="option" id="o${j}" data-j="${j}" aria-selected="false"><span>${esc(l.address)}</span><small>${l.county==="cobb"?"Cobb County":""}</small></li>`).join(""):`<li class="none">We’re not measuring that address yet. We’re adding new areas every week.${hasPhone?` <a href="sms:${encodeURIComponent(BUSINESS.phone)}?&body=${encodeURIComponent("Hi Groundwork, can you quote my yard? Address: "+input.value)}">Text us your address</a> and we’ll send your price.`:""}</li>`;
+  list.hidden=false;input.setAttribute("aria-expanded","true")}
+function close(){clearTimeout(st);list.hidden=true;input.setAttribute("aria-expanded","false")}
+const ML=["Finding your property line","Pulling the 2025 county aerial photo","Outlining the house and driveway","Checking for woods and planting beds","Measuring the lawn"];
+async function measureHit(h){close();input.value=h.address;cur=null;focus=null;xb=0;on=new Set();draft=[];
+  const s1=$("s1");s1.classList.remove("failed");s1.classList.add("loading");$("aimg").removeAttribute("src");$("asvg").innerHTML="";$("yAddr").textContent=h.address;$("apin").textContent="Measuring";
+  $("mlTitle").textContent="Measuring your yard";let k=0;$("mlStep").textContent=ML[0];const tick=setInterval(()=>{k=Math.min(ML.length-1,k+1);$("mlStep").textContent=ML[k]},2600);
+  go(1);
+  let row=null,err="";try{const r=await fetch(FUNC,{method:"POST",headers:fhead,body:JSON.stringify({county:h.county,pin:h.pin})});row=await r.json();if(!r.ok)err=row&&row.error||"error"}catch(e){err="network"}
+  clearInterval(tick);
+  if(err||!row||row.status==="not_home"){s1.classList.add("failed");$("mlTitle").textContent=row&&row.status==="not_home"?"This looks like a common area or an empty lot":"We couldn’t measure this one automatically";
+    $("mlStep").innerHTML=hasPhone?`Text us at <a href="sms:${encodeURIComponent(BUSINESS.phone)}">${esc(BUSINESS.phone)}</a> and we’ll send your price within the hour.`:"We’ll measure it by hand and text you a price within the hour.";return}
+  s1.classList.remove("loading");choose(rowToL(row))}
+function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";draft=[];drawAerial();go(1);try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
+input.addEventListener("input",search);
+input.addEventListener("keydown",e=>{if(list.hidden||!hits.length)return;
+  if(e.key==="ArrowDown")sel=Math.min(hits.length-1,sel+1);else if(e.key==="ArrowUp")sel=Math.max(0,sel-1);
+  else if(e.key==="Enter"){e.preventDefault();choose(hits[sel<0?0:sel]);return}else if(e.key==="Escape"){close();return}else return;
+  e.preventDefault();[...list.children].forEach((li,j)=>li.setAttribute("aria-selected",j===sel));input.setAttribute("aria-activedescendant","o"+sel)});
+list.addEventListener("mousedown",e=>{const li=e.target.closest("[data-j]");if(li){e.preventDefault();choose(hits[+li.dataset.j])}});
+input.addEventListener("blur",()=>setTimeout(close,150));
+
+/* ---------- Owner view (#owner) ---------- */
+function polyArea(pts,mpp){let a=0;for(let i=0;i<pts.length;i++){const[x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length];a+=x1*y2-x2*y1}return Math.abs(a)/2*mpp*mpp*10.7639}
+function renderOwner(){
+  const o=$("owner");o.classList.remove("hidden");
+  const lot=cur?cur[1]:null,mine=lot?(traced[lot]||[]):[];
+  const cls=m=>m>=.4?"m-ok":m>=.3?"m-mid":"m-low";
+  const rows=LOTS.map(L=>quote(L));
+  o.innerHTML=`<h2>Owner view</h2>
+  <div class="warn">Only visible with #owner on the link. Before going live: fill in the business details at the top of the page code, add your booking link, and have a Georgia attorney review the agreement.</div>
+  <div class="otools">${cur&&step===1?`<button class="ob ${tracing?"on":""}" id="oTrace" type="button">${tracing?"Tap bed corners on the aerial":"Trace a bed"}</button><button class="ob" id="oSave" type="button" ${draft.length<3?"disabled":""}>Save bed (${draft.length} points)</button><button class="ob" id="oUndo" type="button" ${draft.length?"":"disabled"}>Undo</button><button class="ob" id="oClear" type="button" ${mine.length?"":"disabled"}>Clear beds</button><span>${mine.length} traced, ${Math.round(mine.reduce((s,b)=>s+b.sqft,0))} sq ft</span>`:`<span>Open a house to trace its beds.</span>`}</div>
+  <div class="otools"><button class="ob" id="oExport" type="button">Copy traced beds (${Object.keys(traced).length} lots)</button><button class="ob" id="oReset" type="button">Restore default pricing</button><span id="oMsg" role="status"></span></div>
+  <details><summary>Pricing assumptions</summary><div class="knobs" style="margin-top:10px">${Object.keys(DEF).map(k=>`<label>${k}<input type="number" step="any" data-k="${k}" value="${K[k]}"></label>`).join("")}</div></details>
+  <details><summary>Margins for all ${rows.length} homes</summary><div class="otable" style="margin-top:10px"><table><thead><tr><th>Address</th><th>Lawn</th><th>Beds</th><th>Biweekly</th><th>Margin</th><th>Stress</th><th>Weekly</th><th>Margin</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.addr)}</td><td>${Math.round(r.turf).toLocaleString("en-US")}</td><td>${Math.round(r.beds.sq)}${r.beds.measured?"":"*"}</td><td>${usd(r.plans.bi.mo)}</td><td class="${cls(r.plans.bi.margin)}">${Math.round(r.plans.bi.margin*100)}%</td><td class="${cls(r.plans.bi.stress)}">${Math.round(r.plans.bi.stress*100)}%</td><td>${usd(r.plans.wk.mo)}</td><td class="${cls(r.plans.wk.margin)}">${Math.round(r.plans.wk.margin*100)}%</td></tr>`).join("")}</tbody></table></div><p class="note">* estimated beds. Stress adds ${usd(K.stress)} per cut to the sub cost.</p></details>`;
+  const b=(id,f)=>{const el=$(id);if(el)el.onclick=f};
+  b("oTrace",()=>{tracing=!tracing;draft=[];$("yard").classList.toggle("trace",tracing);drawAerial();renderOwner()});
+  b("oUndo",()=>{draft.pop();drawAerial();renderOwner()});
+  b("oSave",()=>{(traced[lot]=traced[lot]||[]).push({pts:draft,sqft:Math.round(polyArea(draft,cur[3]))});draft=[];store.set("bq3-beds",traced);drawAerial();render()});
+  b("oClear",()=>{delete traced[lot];store.set("bq3-beds",traced);drawAerial();render()});
+  b("oReset",()=>{K={...DEF};store.set("bq4-knobs",{});render()});
+  b("oExport",()=>{const out={};for(const l in traced)out[l]=traced[l].reduce((s,x)=>s+x.sqft,0);
+    navigator.clipboard.writeText(JSON.stringify(out)).then(()=>$("oMsg").textContent="Copied. Paste it to Claude to publish.",()=>$("oMsg").textContent="Copy was blocked in this view.")});
+  o.querySelectorAll("[data-k]").forEach(i=>i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v))return;K[i.dataset.k]=v;store.set("bq4-knobs",Object.fromEntries(Object.keys(DEF).filter(k=>K[k]!==DEF[k]).map(k=>[k,K[k]])));render()}));
+}
+
+/* ---------- Start ---------- */
+const m=location.hash.match(/^#lot-(\d+)$/);
+if(m){const n=+m[1];if(n>100000&&DB.key)dbGet(SEL+"&id=eq."+(n-100000)).then(r=>{if(r[0])choose(rowToL(r[0]))}).catch(()=>{});else{const L=LOTS.find(l=>l[1]===n);if(L)choose(L)}}
+if(OWNER)renderOwner();
+</script>
+
+</body>
+</html>
