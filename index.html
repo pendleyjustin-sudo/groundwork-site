@@ -397,8 +397,8 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
     <div><h2>Choose your coverage</h2><p class="sub">Three levels of coverage. Every one includes a text after each visit, a visible schedule, text support and the 48-hour redo.</p></div>
     <div class="tiers" role="radiogroup" aria-label="Coverage">
       <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The grass, done right every other week</span></span><span class="tp" id="pLawn"></span></button>
-      <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds and leaves</span></span><span class="tp" id="pComplete"></span></button>
-      <button class="tier" role="radio" data-tier="signature" type="button"><span class="tn"><b>Signature Care</b><span>Everything, weekly all summer, with flowers and shrubs</span></span><span class="tp" id="pSignature"></span></button>
+      <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds, shrubs and leaves</span></span><span class="tp" id="pComplete"></span></button>
+      <button class="tier" role="radio" data-tier="signature" type="button"><span class="tn"><b>Signature Care</b><span>Everything, weekly in season, with seasonal flowers</span></span><span class="tp" id="pSignature"></span></button>
     </div>
     <div class="lock"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="lockNote"></span></div>
     <div class="included" id="incl"></div>
@@ -451,7 +451,7 @@ function quoteGoodThrough(){const d30=new Date(Date.now()+30*864e5),dl=new Date(
 const DB={url:"https://sbkofbgmvrzpruupmsnl.supabase.co",key:"sb_publishable_ZEOiazTsvKX-GfoQhqhj6g_uPcSibe8"};
 const IMG={};
 function rowToL(r){const g=r.geo||{},lot=100000+r.id;IMG[lot]=DB.url+"/storage/v1/object/public/aerials/"+r.image_path;
-  return [r.address,lot,r.land_sqft||Math.round(r.lawn_sqft+r.beds_sqft+r.hard_sqft+r.house_sqft+(g.woods_sqft||0)),g.mpp,g.ring,{h:g.h,d:g.d,b:g.b,w:g.w||[],p:g.p,woods:g.woods_sqft||0,review:r.status==="needs_review",a:[r.house_sqft,r.hard_sqft,r.beds_sqft,r.lawn_sqft]}]}
+  return [r.address,lot,r.land_sqft||Math.round(r.lawn_sqft+r.beds_sqft+r.hard_sqft+r.house_sqft+(g.woods_sqft||0)),g.mpp,g.ring,{h:g.h,d:g.d,b:g.b,w:g.w||[],p:g.p,woods:g.woods_sqft||0,mv:g.market&&g.market.median,review:r.status==="needs_review",a:[r.house_sqft,r.hard_sqft,r.beds_sqft,r.lawn_sqft]}]}
 async function dbGet(q){const r=await fetch(DB.url+"/rest/v1/properties?"+q,{headers:{apikey:DB.key,Authorization:"Bearer "+DB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
 const SEL="select=id,address,land_sqft,lawn_sqft,beds_sqft,hard_sqft,house_sqft,geo,image_path,status";
 const FUNC=DB.url+"/functions/v1/measure";
@@ -459,14 +459,25 @@ const ANON=""; // legacy anon public key (only needed while the measure function
 const fhead=Object.assign({apikey:DB.key,"Content-Type":"application/json"},ANON?{Authorization:"Bearer "+ANON}:{});
 const LOTS=[];   // [address, lot #, lot sq ft, meters per image pixel, property line in image px]
 const BEDS_MEASURED={}; // lot # -> bed sq ft, traced in owner view
-const DEF={nonTurf:3700,bedDefault:600,pBase:32.5,pPpk:5.85,sBase:15,sPpk:3,tBase:32.5,tPpk:6.5,tLab:12,tMat:1.6,rounds:7,cBi:17,cWk:24,ovh:6,stress:8,
- strawSqftPerBale:45,strawPerBale:6.5,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:55,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2};
+/* Rates calibrated to a signed local contract (5,100 sq ft lawn, $255/mo: 26 visits with pruning and leaves, 5 treatments at $96).
+   pBase/pPpk = price per mow visit; sBase/sPpk = what we pay the crew per visit. */
+const DEF={nonTurf:3700,bedDefault:600,pBase:50,pPpk:5,sBase:35,sPpk:3,tBase:60,tPpk:7,tLab:15,tMat:2,rounds:5,cBi:26,cWk:39,ovh:6,stress:8,
+ strawSqftPerBale:45,strawPerBale:8,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:65,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2};
 
+/* Neighborhood pricing tiers, set by the median county fair-market value (FMV) of homes in the subdivision.
+   Cobb subdivision medians: p50 ~$435k, p80 ~$650k, p95 ~$1.09M. Anchor: Smithwell Point ($763k) pays the
+   signed local contract rate, so Premium = 1.0. mult scales every price; floor = lowest Lawn Care price; plan = shown first. */
+const MARKETS=[
+  {n:1,name:"Value",max:400000,mult:0.85,floor:140,plan:"lawn"},
+  {n:2,name:"Core",max:650000,mult:0.95,floor:165,plan:"complete"},
+  {n:3,name:"Premium",max:1000000,mult:1.0,floor:190,plan:"complete"},
+  {n:4,name:"Estate",max:Infinity,mult:1.25,floor:275,plan:"signature"}];
+const marketFor=v=>v?MARKETS.find(m=>v<m.max):MARKETS[1];
 const OWNER=location.hash==="#owner";
 const EMBED=/[?&]embed=1/.test(location.search)&&window.parent!==window;
 if(EMBED)document.documentElement.classList.add("embed");
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let K={...DEF,...(OWNER?store.get("bq4-knobs",{}):{})};
+let K={...DEF,...(OWNER?store.get("bq5-knobs",{}):{})};
 let traced=OWNER?store.get("bq3-beds",{}):{};
 const $=id=>document.getElementById(id);
 const usd=v=>"$"+Math.round(v).toLocaleString("en-US");
@@ -487,23 +498,24 @@ function geoOf(L){const g=L[5],X=L===cur?xb:0;if(!g)return null;const t=traced[L
   const [house,hard,gb,lawn]=g.a,bedsSq=(tb!=null?tb:gb)+X,lawnSq=Math.max(1500,lawn+gb-bedsSq);const woods=g.woods||0;return{house,hard,beds:bedsSq,lawn:lawnSq,woods,lot:house+hard+bedsSq+lawnSq+woods,traced:tb!=null,extra:X}}
 function quote(L){
   const [addr,lot,lotSq]=L,geo=geoOf(L),b=geo?{sq:geo.beds,measured:true}:(o=>({sq:o.sq+(L===cur?xb:0),measured:o.measured}))(beds(lot)),turf=geo?geo.lawn:Math.max(2500,lotSq-K.nonTurf-b.sq),k=turf/1000;
-  const cut=K.pBase+K.pPpk*k,sub=K.sBase+K.sPpk*k,trt=K.tBase+K.tPpk*k,trtCost=K.tLab+K.tMat*k;
-  const plan=(c,id,name)=>{const mo=Math.round((c*cut+K.rounds*trt)/12/5)*5,rev=mo*12,cost=c*sub+K.rounds*trtCost+rev*K.ovh/100;return{id,name,visits:c,mo,rev,margin:(rev-cost)/rev,stress:(rev-cost-c*K.stress)/rev}};
+  const M=marketFor(L[5]&&L[5].mv),x=M.mult;
+  const cut=(K.pBase+K.pPpk*k)*x,sub=K.sBase+K.sPpk*k,trt=(K.tBase+K.tPpk*k)*x,trtCost=K.tLab+K.tMat*k;
+  const plan=(c,id,name)=>{const mo=Math.max(Math.round(M.floor*c/K.cBi/5)*5,Math.round((c*cut+K.rounds*trt)/12/5)*5),rev=mo*12,cost=c*sub+K.rounds*trtCost+rev*K.ovh/100;return{id,name,visits:c,mo,rev,margin:(rev-cost)/rev,stress:(rev-cost-c*K.stress)/rev}};
   const bales=Math.ceil(b.sq/K.strawSqftPerBale),yards=Math.ceil(b.sq/K.mulchSqftPerYard*2)/2;
   const add=[
     {id:"straw",name:"Pine straw",d:`${bales} bales, refreshed spring and fall`,unit:`${usd2(K.strawPerBale)} per bale installed`,year:bales*K.strawPerBale*K.strawInstalls,sched:"March and October"},
     {id:"mulch",name:"Hardwood mulch instead of straw",d:`${yards} cubic yards at 3 inches, once a year`,unit:`${usd(K.mulchPerYard)} per cubic yard installed`,year:yards*K.mulchPerYard,sched:"March"},
     {id:"color",name:"Seasonal flowers",d:`${K.colorFlats} flats in your front beds, spring and fall`,unit:`${usd(K.colorPerFlat)} per flat installed`,year:K.colorFlats*K.colorPerFlat*K.colorRotations,sched:"April and October"},
     {id:"aer",name:"Aeration and overseeding",d:"Once a year in the fall, timed to your grass type",unit:"Priced to your lawn size",year:K.aerBase+K.aerPpk*k,sched:"Timed to grass type"},
-    {id:"shrub",name:"Shrub trimming",d:`${K.shrubVisits} visits, spring and late summer`,unit:`${usd(K.shrubVisit)} per visit`,year:K.shrubVisit*K.shrubVisits,sched:"May and August"},
-    {id:"leaf",name:"Leaf cleanup",d:`${K.leafVisits} visits in late fall`,unit:`${usd(K.leafVisit)} per visit`,year:K.leafVisit*K.leafVisits,sched:"November and December"}];
-  add.forEach(a=>a.mo=Math.round(a.year/12));
-  return{addr,lot,lotSq,turf,beds:b,geo,cut,trt,plans:{bi:plan(K.cBi,"bi","Every other week"),wk:plan(K.cWk,"wk","Weekly in summer")},add};
+    {id:"shrub",name:"Shrub trimming",d:`${K.shrubVisits} visits, spring and late summer`,unit:`${usd(K.shrubVisit*x)} per visit`,year:K.shrubVisit*K.shrubVisits,sched:"May and August"},
+    {id:"leaf",name:"Leaf cleanup",d:`${K.leafVisits} visits in late fall`,unit:`${usd(K.leafVisit*x)} per visit`,year:K.leafVisit*K.leafVisits,sched:"November and December"}];
+  add.forEach(a=>{if(a.id!=="straw"&&a.id!=="mulch"&&a.id!=="color")a.year*=x;a.mo=Math.round(a.year/12)});
+  return{addr,lot,lotSq,turf,beds:b,geo,cut,trt,plans:{bi:plan(K.cBi,"bi","Every other week, all year"),wk:plan(K.cWk,"wk","Weekly March to October")},add,market:M};
 }
 
 /* ---------- State ---------- */
 let cur=null,step=0,planId="bi",tier="complete",on=new Set(),q=null,xb=0;
-const TIERS={lawn:{name:"Lawn Care",freq:"bi",core:[]},complete:{name:"Complete Care",freq:"bi",core:["straw","leaf"]},signature:{name:"Signature Care",freq:"wk",core:["straw","leaf","color","shrub"]}};
+const TIERS={lawn:{name:"Lawn Care",freq:"bi",core:[]},complete:{name:"Complete Care",freq:"bi",core:["straw","leaf","shrub"]},signature:{name:"Signature Care",freq:"wk",core:["straw","leaf","color","shrub"]}};
 function coreFor(qq,t){let ids=TIERS[t].core.slice();if(on.has("mulch")&&ids.includes("straw"))ids=ids.map(i=>i==="straw"?"mulch":i);return qq.add.filter(a=>ids.includes(a.id))}
 function tierPrice(qq,t){return qq.plans[TIERS[t].freq].mo+coreFor(qq,t).reduce((s,a)=>s+a.mo,0)}
 function chosen(){planId=TIERS[tier].freq;const p=q.plans[planId],core=coreFor(q,tier),hasBeds=TIERS[tier].core.includes("straw");
@@ -532,7 +544,7 @@ function render(){
   ["lawn","complete","signature"].forEach(t=>$("p"+t[0].toUpperCase()+t.slice(1)).innerHTML=usd(tierPrice(q,t))+"<small> /mo</small>");
   document.querySelectorAll(".tier").forEach(o=>o.setAttribute("aria-checked",o.dataset.tier===tier));
   const tick='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
-  const inc=[`Mowing, trimming, edging and blowing, ${planId==="bi"?"every other week":"weekly May to September"}`,`${K.rounds} rounds of fertilizer and weed control`];
+  const inc=[`Mowing, trimming, edging and blowing, ${planId==="bi"?"every other week, all year":"weekly March to October, every other week in winter"}`,`${K.rounds} rounds of fertilizer and weed control`];
   const T=TIERS[tier].core;
   if(T.includes("straw")){const bb=q.add.find(a=>a.id===(on.has("mulch")?"mulch":"straw"));inc.push(on.has("mulch")?`Hardwood mulch refreshed once a year (${bb.d.split(",")[0]})`:`Pine straw refreshed spring and fall (${bb.d.split(",")[0]})`,"Leaf cleanup, two visits in late fall")}
   if(T.includes("color"))inc.push(`Seasonal flowers in your front beds, spring and fall`,`Shrub trimming twice a year`);
@@ -721,7 +733,7 @@ async function measureHit(h){close();input.value=h.address;cur=null;focus=null;x
   if(err||!row||row.status==="not_home"){s1.classList.add("failed");$("mlTitle").textContent=row&&row.status==="not_home"?"This looks like a common area or an empty lot":"We couldn’t measure this one automatically";
     $("mlStep").innerHTML=hasPhone?`Text us at <a href="sms:${encodeURIComponent(BUSINESS.phone)}">${esc(BUSINESS.phone)}</a> and we’ll send your price within the hour.`:"We’ll measure it by hand and text you a price within the hour.";return}
   s1.classList.remove("loading");choose(rowToL(row))}
-function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";draft=[];drawAerial();go(1);try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
+function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];drawAerial();go(1);try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
 input.addEventListener("input",search);
 input.addEventListener("keydown",e=>{if(list.hidden||!hits.length)return;
   if(e.key==="ArrowDown")sel=Math.min(hits.length-1,sel+1);else if(e.key==="ArrowUp")sel=Math.max(0,sel-1);
@@ -748,10 +760,10 @@ function renderOwner(){
   b("oUndo",()=>{draft.pop();drawAerial();renderOwner()});
   b("oSave",()=>{(traced[lot]=traced[lot]||[]).push({pts:draft,sqft:Math.round(polyArea(draft,cur[3]))});draft=[];store.set("bq3-beds",traced);drawAerial();render()});
   b("oClear",()=>{delete traced[lot];store.set("bq3-beds",traced);drawAerial();render()});
-  b("oReset",()=>{K={...DEF};store.set("bq4-knobs",{});render()});
+  b("oReset",()=>{K={...DEF};store.set("bq5-knobs",{});render()});
   b("oExport",()=>{const out={};for(const l in traced)out[l]=traced[l].reduce((s,x)=>s+x.sqft,0);
     navigator.clipboard.writeText(JSON.stringify(out)).then(()=>$("oMsg").textContent="Copied. Paste it to Claude to publish.",()=>$("oMsg").textContent="Copy was blocked in this view.")});
-  o.querySelectorAll("[data-k]").forEach(i=>i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v))return;K[i.dataset.k]=v;store.set("bq4-knobs",Object.fromEntries(Object.keys(DEF).filter(k=>K[k]!==DEF[k]).map(k=>[k,K[k]])));render()}));
+  o.querySelectorAll("[data-k]").forEach(i=>i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v))return;K[i.dataset.k]=v;store.set("bq5-knobs",Object.fromEntries(Object.keys(DEF).filter(k=>K[k]!==DEF[k]).map(k=>[k,K[k]])));render()}));
 }
 
 /* ---------- Start ---------- */
