@@ -414,7 +414,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
       </div>
     </div>
     <div class="measured" id="measured"></div>
-    <div class="review hidden" id="review"><b>We’re double-checking this one.</b> Part of this yard was hard to read from the air, so a person reviews it. Your price is shown below and we’ll confirm it within the hour.</div>
+    <div class="review hidden" id="review"></div>
     <div class="stop" id="stop"></div>
     <div><h2>Choose your coverage</h2><p class="sub">Pick one now; switch anytime with a text. Every plan includes visit texts, your schedule, text support and the 48-hour fix.</p></div>
     <div class="tiers" role="radiogroup" aria-label="Coverage">
@@ -474,9 +474,9 @@ function quoteGoodThrough(){const d30=new Date(Date.now()+30*864e5),dl=new Date(
 const DB={url:"https://sbkofbgmvrzpruupmsnl.supabase.co",key:"sb_publishable_ZEOiazTsvKX-GfoQhqhj6g_uPcSibe8"};
 const IMG={};
 function rowToL(r){const g=r.geo||{},lot=100000+r.id;IMG[lot]=DB.url+"/storage/v1/object/public/aerials/"+r.image_path;
-  return [r.address,lot,r.land_sqft||Math.round(r.lawn_sqft+r.beds_sqft+r.hard_sqft+r.house_sqft+(g.woods_sqft||0)),g.mpp,g.ring,{h:g.h,d:g.d,b:g.b,w:g.w||[],p:g.p,woods:g.woods_sqft||0,mv:g.market&&g.market.median,review:r.status==="needs_review",a:[r.house_sqft,r.hard_sqft,r.beds_sqft,r.lawn_sqft]}]}
+  return [r.address,lot,r.land_sqft||Math.round(r.lawn_sqft+r.beds_sqft+r.hard_sqft+r.house_sqft+(g.woods_sqft||0)),g.mpp,g.ring,{h:g.h,d:g.d,b:g.b,w:g.w||[],p:g.p,woods:g.woods_sqft||0,mv:g.market&&g.market.median,review:r.status==="needs_review",flags:r.flags||[],a:[r.house_sqft,r.hard_sqft,r.beds_sqft,r.lawn_sqft]}]}
 async function dbGet(q){const r=await fetch(DB.url+"/rest/v1/properties?"+q,{headers:{apikey:DB.key,Authorization:"Bearer "+DB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
-const SEL="select=id,address,land_sqft,lawn_sqft,beds_sqft,hard_sqft,house_sqft,geo,image_path,status";
+const SEL="select=id,address,land_sqft,lawn_sqft,beds_sqft,hard_sqft,house_sqft,geo,image_path,status,flags";
 const FUNC=DB.url+"/functions/v1/measure";
 const ANON=""; // legacy anon public key (only needed while the measure function enforces JWT)
 const fhead=Object.assign({apikey:DB.key,"Content-Type":"application/json"},ANON?{Authorization:"Bearer "+ANON}:{});
@@ -565,7 +565,7 @@ function render(){
   renderBreakdown();
   $("measured").innerHTML=q.geo?`<b>We measured it for you.</b> ${(Math.round(q.turf/100)*100).toLocaleString("en-US")} sq ft of lawn and ${(Math.round(q.beds.sq/10)*10).toLocaleString("en-US")} sq ft of beds${q.geo.woods>300?`, with ${(Math.round(q.geo.woods/100)*100).toLocaleString("en-US")} sq ft of woods left out so you don't pay for it`:""}. No tape measure, no site visit, no waiting.`:"<b>Your yard, sized up.</b> We confirm every measurement on a free walk-through, so the price you see is the price you pay.";
   renderStop();
-  $("review").classList.toggle("hidden",!(cur[5]&&cur[5].review));
+  renderReview();
   $("xseg").innerHTML=[[0,"None",""],[100,"Small","~100 sq ft"],[250,"Medium","~250 sq ft"],[500,"Large","~500 sq ft"]].map(([v,n,d])=>`<button type="button" data-x="${v}" aria-pressed="${xb===v}">${n}${d?`<small>${d}</small>`:""}</button>`).join("");
   ["lawn","complete","signature"].forEach(t=>$("p"+t[0].toUpperCase()+t.slice(1)).innerHTML=usd(tierPrice(q,t))+"<small> /mo</small>");
   document.querySelectorAll(".tier").forEach(o=>o.setAttribute("aria-checked",o.dataset.tier===tier));
@@ -611,6 +611,19 @@ $("agree").addEventListener("change",render);
 
 /* Hold the price in the bottom bar until the plan cards have been seen, so the value reads first. */
 try{new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&cur&&!seenPrice){seenPrice=true;render()}},{threshold:.4}).observe(document.querySelector(".tiers"))}catch(e){seenPrice=true}
+
+/* ---------- Hard-to-read yards: say so plainly and make the fix one text ---------- */
+let reviewSent={};
+function renderReview(){const g=cur[5]||{},el=$("review");el.classList.toggle("hidden",!g.review);if(!g.review)return;
+  const f=g.flags||[],why=f.includes("trees unclear in photo")?"telling grass from trees":f.some(x=>/house outline/.test(x))?"finding the house outline":f.some(x=>/shade/.test(x))?"seeing through the shade":"reading part of the yard";
+  const msg=`Hi Groundwork, I'm at ${q.addr}. Here's a photo of my yard for my quote:`;
+  const head=`<b>We’re having a hard time ${why} from the aerial.</b> The price below is our best read. Send us a quick text, a photo of the backyard helps, and we’ll confirm your exact price, usually within the hour.`;
+  if(hasPhone){el.innerHTML=head+`<a class="sbtn" style="margin-top:10px;display:flex" href="sms:${encodeURIComponent(BUSINESS.phone)}?&body=${encodeURIComponent(msg)}" onclick="logEvent('question')">Text us a photo</a>`;return}
+  if(reviewSent[q.lot]){el.innerHTML=head+`<div style="margin-top:10px"><b>Got it.</b> We’ll text ${esc(reviewSent[q.lot])} shortly. Nothing else to do.</div>`;return}
+  el.innerHTML=head+`<form id="revF" style="display:flex;gap:6px;margin-top:10px"><input id="revP" type="tel" inputmode="tel" autocomplete="tel" placeholder="Your mobile number" aria-label="Mobile number" style="flex:1;padding:10px 12px;border-radius:10px;border:.5px solid var(--hair);font:inherit"><button style="padding:10px 14px;border-radius:10px;border:0;background:var(--field);color:var(--field-ink);font:inherit;font-weight:700">Text me</button></form>`;
+  $("revF").onsubmit=async ev=>{ev.preventDefault();const ph=$("revP").value.replace(/[^0-9+]/g,"");if(ph.replace(/\D/g,"").length<10){$("revP").focus();return}
+    try{await fetch(DB.url+"/rest/v1/quote_requests",{method:"POST",headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({address:q.addr,phone:ph,kind:"review",price:tierPrice(q,tier),property_id:q.lot>100000?q.lot-100000:null})})}catch(e){}
+    reviewSent[q.lot]=$("revP").value.trim();renderReview()}}
 
 /* ---------- One-time cut: fill a gap, no plan. Books by text; paid after it's done. ---------- */
 let onceOpen=false,onceWhen="asap",onceDone={};
