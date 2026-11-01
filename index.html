@@ -589,7 +589,7 @@ function render(){
   $("lockNote").innerHTML=`<b>This price is locked.</b> It holds after the walk-through unless we find lawn the aerial can't see, and we'll show you any change before your first charge${foundingOpen()?`, and as a founding member it holds through ${BUSINESS.founding.lockedThrough}`:""}. Quote good through ${quoteGoodThrough()}.`;
   renderShare(c);
   renderOnce();
-  $("extrasHead").innerHTML='Coming in 2027 <span class="soon">Soon</span>';
+  $("extrasHead").textContent="Coming in 2027";
   $("extrasSub").textContent="We're adding the rest of the yard one service at a time, on the same plan, text thread and payment. Tap what you'd want and you'll be first in line at founding-member prices.";
   $("addons").innerHTML=COMING.map(([id,n,d])=>`<label class="row"><span><b>${n}</b><span class="d">${d}</span></span><span class="amt"><span class="soon">Coming soon</span></span><input type="checkbox" class="tog" data-want="${id}" ${want.has(id)?"checked":""} aria-label="Notify me about ${n}"></label>`).join("");
   // bar
