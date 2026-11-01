@@ -320,6 +320,9 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
 .once input{padding:11px 12px;border-radius:10px;border:.5px solid var(--hair);background:var(--paper);font:inherit}
 .once .go1{padding:12px;border-radius:12px;border:0;background:var(--field);color:var(--field-ink);font:inherit;font-weight:700;cursor:pointer}
 .once .done{margin-top:12px;background:var(--fill);border-radius:10px;padding:11px 12px;font-size:.9rem;color:var(--field)}
+.chips2{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chips2 span{background:var(--surface);box-shadow:0 0 0 .5px var(--hair);border-radius:999px;padding:6px 11px;font-size:.82rem;color:var(--muted)}
+.soon{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--fill-2);color:var(--field);border-radius:999px;padding:3px 8px;vertical-align:middle}
+.yardinfo .extra{display:none}
 .measured{font-size:.85rem;color:var(--field);background:var(--fill);border-radius:var(--r-sm);padding:9px 11px;line-height:1.35}
 @media (max-width:380px){.how{grid-template-columns:1fr}.how div{display:flex;gap:8px;align-items:baseline}.how .n{flex:none}}
 </style>
@@ -331,7 +334,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
   <header class="lawn" id="hero"><svg class="arcs" viewBox="0 0 200 200" aria-hidden="true"><path d="M20 200V120A100 100 0 0 1 120 20h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".55"/><path d="M66 200v-64a54 54 0 0 1 54-54h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".35"/><path d="M112 200v-34a8 8 0 0 1 8-8h80" fill="none" stroke="#d9d6c8" stroke-width="26" opacity=".18"/></svg>
     <div class="mark"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M5 37V25A20 20 0 0 1 25 5h10" fill="none" stroke="#d9d6c8" stroke-width="6"/><path d="M14 37v-9a11 11 0 0 1 11-11h10" fill="none" stroke="#9fb89f" stroke-width="6"/><path d="M23 37v-4a3 3 0 0 1 3-3h9" fill="none" stroke="#6b8f71" stroke-width="6"/></svg><span class="wordmark"><b>GROUNDWORK</b><small>LANDSCAPE</small></span></div>
     <h1>Never think about your yard again.</h1>
-    <p>Your whole yard, handled: lawn, beds, shrubs and leaves, on one monthly price. One text thread, nothing to chase, no surprises.</p>
+    <p>Your lawn, handled. Cut, edged and blown clean on a schedule you can see, one price every month, and a text after every visit. Nothing to chase.</p>
     <div class="tag">Seamless. Painless. Handled.</div>
   </header>
 
@@ -355,7 +358,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
       <div class="vs" role="table" aria-label="How we compare">
         <div class="vsrow vshead" role="row"><span role="columnheader">The usual way</span><span role="columnheader">With us</span></div>
         <div class="vsrow" role="row"><span role="cell">Call around, wait days for someone to come out and quote</span><span role="cell">Your price in 30 seconds, measured from your actual lot</span></div>
-        <div class="vsrow" role="row"><span role="cell">A mow guy, a weed company, a straw crew, a leaf crew</span><span role="cell">One company and one plan for everything outside the house</span></div>
+        <div class="vsrow" role="row"><span role="cell">Your regular guy is out and the grass is a foot tall</span><span role="cell">A one-time cut, priced in 30 seconds and booked by text</span></div>
         <div class="vsrow" role="row"><span role="cell">Wondering when they're coming, or whether they came</span><span role="cell">A text the night before and a text after, saying what was done</span></div>
         <div class="vsrow" role="row"><span role="cell">Extras billed "upon completion," price bumps at renewal</span><span role="cell">Every price on one page, locked, one automatic payment a month</span></div>
         <div class="vsrow" role="row"><span role="cell">Fine print, long notice periods, arbitration clauses</span><span role="cell">A short, plain-English agreement. Cancel with 30 days' notice</span></div>
@@ -375,14 +378,19 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
         <div class="bub me">Yes please</div>
         <div class="bub">Done. Added to next Thursday's visit.</div>
         <div class="when">Mon 1:15 PM</div>
-        <div class="bub">Treatment 4 of 5 done today: pre-emergent and broadleaf weed control. Keep kids and pets off the lawn until it dries, about 2 hours. No need to water. Weeds will curl and brown over 7 to 10 days. Next treatment: early February.</div>
+        <div class="bub">Heads up: heavy rain tomorrow, so we've moved your cut to Friday, same window. Nothing you need to do.</div>
       </div>
+    </div>
+    <div class="soonfront">
+      <h2>The rest of the yard is coming <span class="soon">2027</span></h2>
+      <p class="sub">We're starting with mowing and doing it right. Next, one service at a time, on the same plan and the same text thread:</p>
+      <div class="chips2"><span>Lawn treatments</span><span>Pine straw and mulch</span><span>Leaf cleanup</span><span>Shrub trimming</span><span>Seasonal flowers</span><span>Aeration and overseeding</span></div>
     </div>
     <div class="trust">
       <h2>One company, one standard</h2>
       <p class="sub" style="margin-top:-6px">Every visit is scheduled, checked and confirmed in writing by Groundwork. You have one number to text, and one company that answers for the result.</p>
       <div class="badges">
-        <div class="badge"><b>Licensed</b><span id="licNote"></span></div>
+        <div class="badge"><b>Locked price</b><span>The same every month, no surprise bumps</span></div>
         <div class="badge"><b>Insured</b><span>General liability, certificate on request</span></div>
         <div class="badge"><b>Checked crews</b><span>Uniformed and background-checked</span></div>
         <div class="badge"><b>48-hour fix</b><span>Not right? We come back free</span></div>
@@ -416,11 +424,10 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
     <div class="measured" id="measured"></div>
     <div class="review hidden" id="review"></div>
     <div class="stop" id="stop"></div>
-    <div><h2>Choose your coverage</h2><p class="sub">Pick one now; switch anytime with a text. Every plan includes visit texts, your schedule, text support and the 48-hour fix.</p></div>
+    <div><h2>Choose your mowing plan</h2><p class="sub">Every cut includes mowing, string trimming, edging and blowing clean. Same price every month; switch plans anytime with a text.</p></div>
     <div class="tiers" role="radiogroup" aria-label="Coverage">
-      <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The lawn, done right every other week, all year</span></span><span class="tp" id="pLawn"></span></button>
-      <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds, shrubs and leaves</span></span><span class="tp" id="pComplete"></span></button>
-      <button class="tier" role="radio" data-tier="signature" type="button"><span class="tn"><b>Signature Care</b><span>Everything, weekly in season, with seasonal flowers</span></span><span class="tp" id="pSignature"></span></button>
+      <button class="tier" role="radio" data-tier="bi" type="button"><span class="tn"><b>Every other week</b><span>26 cuts a year, the same steady rhythm all year</span></span><span class="tp" id="pBi"></span></button>
+      <button class="tier" role="radio" data-tier="season" type="button"><span class="tn"><span class="flag">Best-looking lawn</span><b>Seasonal</b><span>Weekly April to September when grass grows fastest, every other week in spring and fall, monthly in winter. About 35 cuts a year</span></span><span class="tp" id="pSeason"></span></button>
     </div>
     <div class="lock"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="lockNote"></span></div>
     <div class="included" id="incl"></div>
@@ -465,7 +472,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
 const BUSINESS={replyPromise:"within an hour, 7am to 7pm, seven days a week",name:"Groundwork Landscape",legal:"Groundwork Landscape LLC",phone:"[phone]",email:"[email]",bookingUrl:"",seasonStart:"March 2027",license:"[GA pesticide contractor license #]",
 
  founding:{spots:100,claimed:0,deadline:"2026-12-31",lockedThrough:"the end of 2028"},
- fallStarter:{on:true,price:150,by:"2026-11-30"}};
+ fallStarter:{on:false,price:150,by:"2026-11-30"}};
 const hasPhone=!/^\[/.test(BUSINESS.phone);
 const fmtDate=d=>new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
 const foundingOpen=()=>new Date()<=new Date(BUSINESS.founding.deadline+"T23:59:59")&&BUSINESS.founding.claimed<BUSINESS.founding.spots;
@@ -484,18 +491,20 @@ const LOTS=[];   // [address, lot #, lot sq ft, meters per image pixel, property
 const BEDS_MEASURED={}; // lot # -> bed sq ft, traced in owner view
 /* Rates calibrated to a signed local contract (5,100 sq ft lawn, $255/mo: 26 visits with pruning and leaves, 5 treatments at $96).
    pBase/pPpk = price per mow visit; sBase/sPpk = what we pay the crew per visit. */
-const DEF={nonTurf:3700,bedDefault:600,pBase:50,pPpk:5,sBase:35,sPpk:3,tBase:60,tPpk:7,tLab:15,tMat:2,rounds:5,cBi:26,cWk:39,ovh:6,stress:8,
+/* Mowing only for now: rounds (lawn treatments) = 0. cBi = every other week all year; cWk = seasonal schedule
+   (weekly Apr-Sep ~26, every other week Mar/Oct/Nov ~6, once a month Dec-Feb 3). */
+const DEF={nonTurf:3700,bedDefault:600,pBase:50,pPpk:5,sBase:35,sPpk:3,tBase:60,tPpk:7,tLab:15,tMat:2,rounds:0,cBi:26,cWk:35,ovh:6,stress:8,
  strawSqftPerBale:45,strawPerBale:8,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:65,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2,
  oneMult:1.3,oneMin:85}; // one-time cut = 1.3x a plan visit (no commitment, fit into the schedule), never under $85 before tier
 
 /* Neighborhood pricing tiers, set by the median county fair-market value (FMV) of homes in the subdivision.
    Cobb subdivision medians: p50 ~$435k, p80 ~$650k, p95 ~$1.09M. Anchor: Smithwell Point ($763k) pays the
-   signed local contract rate, so Premium = 1.0. mult scales every price; floor = lowest Lawn Care price; plan = shown first. */
+   signed local contract rate, so Premium = 1.0. mult scales every price; floor = lowest every-other-week price; plan = shown first. */
 const MARKETS=[
-  {n:1,name:"Value",max:400000,mult:0.85,floor:140,plan:"lawn"},
-  {n:2,name:"Core",max:650000,mult:0.95,floor:165,plan:"complete"},
-  {n:3,name:"Premium",max:1000000,mult:1.0,floor:190,plan:"complete"},
-  {n:4,name:"Estate",max:Infinity,mult:1.25,floor:275,plan:"signature"}];
+  {n:1,name:"Value",max:400000,mult:0.85,floor:120,plan:"bi"},
+  {n:2,name:"Core",max:650000,mult:0.95,floor:140,plan:"bi"},
+  {n:3,name:"Premium",max:1000000,mult:1.0,floor:160,plan:"season"},
+  {n:4,name:"Estate",max:Infinity,mult:1.25,floor:230,plan:"season"}];
 const marketFor=v=>v?MARKETS.find(m=>v<m.max):MARKETS[1];
 const OWNER=location.hash==="#owner";
 const EMBED=/[?&]embed=1/.test(location.search)&&window.parent!==window;
@@ -513,7 +522,7 @@ document.querySelectorAll(".reply").forEach(e=>e.textContent=BUSINESS.replyPromi
   const fall=BUSINESS.fallStarter.on&&new Date()<=new Date(BUSINESS.fallStarter.by+"T23:59:59");
   $("offer").innerHTML=foundingOpen()?`<span class="k">Founding members</span><b>The first ${F.spots} homes lock their price through ${F.lockedThrough}.</b><span>No increase at your first renewal. ${left} of ${F.spots} spots left. Offer ends ${fmtDate(F.deadline)}.${fall?` Want to try us first? Sign up by ${fmtDate(BUSINESS.fallStarter.by)} and we'll do a leaf cleanup this fall for ${usd(BUSINESS.fallStarter.price)}.`:""}</span><div class="meter" aria-hidden="true"><i style="width:${Math.max(4,F.claimed/F.spots*100)}%"></i></div>`:"";
   $("offer").classList.toggle("hidden",!foundingOpen());
-  $("licNote").textContent=/^\[/.test(BUSINESS.license)?"Georgia commercial pesticide contractor":"Georgia pesticide contractor #"+BUSINESS.license;
+  if($("licNote"))$("licNote").textContent=/^\[/.test(BUSINESS.license)?"Georgia commercial pesticide contractor":"Georgia pesticide contractor #"+BUSINESS.license;
 })();
 
 /* ---------- Pricing engine ---------- */
@@ -534,18 +543,21 @@ function quote(L){
     {id:"shrub",name:"Shrub trimming",d:`${K.shrubVisits} visits, spring and late summer`,unit:`${usd(K.shrubVisit*x)} per visit`,year:K.shrubVisit*K.shrubVisits,sched:"May and August"},
     {id:"leaf",name:"Leaf cleanup",d:`${K.leafVisits} visits in late fall`,unit:`${usd(K.leafVisit*x)} per visit`,year:K.leafVisit*K.leafVisits,sched:"November and December"}];
   add.forEach(a=>{if(a.id!=="straw"&&a.id!=="mulch"&&a.id!=="color")a.year*=x;a.mo=Math.round(a.year/12)});
-  return{addr,lot,lotSq,turf,beds:b,geo,cut,trt,plans:{bi:plan(K.cBi,"bi","Every other week, all year"),wk:plan(K.cWk,"wk","Weekly March to October")},add,market:M};
+  return{addr,lot,lotSq,turf,beds:b,geo,cut,trt,plans:{bi:plan(K.cBi,"bi","Every other week, all year"),wk:plan(K.cWk,"wk","Seasonal: weekly April to September")},add,market:M};
 }
 
+/* Services we'll add once crews are subbed out; shown as "coming soon" with a tap to get first access. */
+const COMING=[["treat","Lawn treatments","Fertilizer and weed control, 5 rounds a year"],["straw","Pine straw and mulch","Fresh beds every spring and fall"],["leaf","Leaf cleanup","Leaves gone before you notice them"],["shrub","Shrub trimming","Shaped twice a year"],["color","Seasonal flowers","Front beds refreshed spring and fall"],["aer","Aeration and overseeding","Once a year, timed to your grass"],["whole","One plan for the whole yard","Lawn, beds, shrubs and leaves on one price"]];
+
 /* ---------- State ---------- */
-let seenPrice=false,cur=null,step=0,planId="bi",tier="complete",on=new Set(),q=null,xb=0;
-const TIERS={lawn:{name:"Lawn Care",freq:"bi",core:[]},complete:{name:"Complete Care",freq:"bi",core:["straw","leaf","shrub"]},signature:{name:"Signature Care",freq:"wk",core:["straw","leaf","color","shrub"]}};
+let seenPrice=false,cur=null,step=0,planId="bi",tier="bi",want=new Set(),on=new Set(),q=null,xb=0;
+const TIERS={bi:{name:"Every-other-week mowing",freq:"bi",core:[]},season:{name:"Seasonal mowing",freq:"wk",core:[]}};
 function coreFor(qq,t){let ids=TIERS[t].core.slice();if(on.has("mulch")&&ids.includes("straw"))ids=ids.map(i=>i==="straw"?"mulch":i);return qq.add.filter(a=>ids.includes(a.id))}
 function tierPrice(qq,t){return qq.plans[TIERS[t].freq].mo+coreFor(qq,t).reduce((s,a)=>s+a.mo,0)}
 function chosen(){planId=TIERS[tier].freq;const p=q.plans[planId],core=coreFor(q,tier),hasBeds=TIERS[tier].core.includes("straw");
   const ex=q.add.filter(a=>on.has(a.id)&&!core.includes(a)&&!(hasBeds&&(a.id==="mulch"||a.id==="straw")));
   return{p,core,ex,name:TIERS[tier].name,mo:p.mo+core.reduce((s,a)=>s+a.mo,0)+ex.reduce((s,a)=>s+a.mo,0)}}
-function planCode(){const parts=["BP",q.lot,{lawn:"L",complete:"C",signature:"S"}[tier],...chosen().ex.map(a=>({straw:"S",mulch:"M",color:"F",aer:"A",leaf:"L",shrub:"T"})[a.id]),...(xb?["B"+xb]:[])];return parts.join("-")}
+function planCode(){const parts=["BP",q.lot,{bi:"B",season:"S"}[tier],...chosen().ex.map(a=>({straw:"S",mulch:"M",color:"F",aer:"A",leaf:"L",shrub:"T"})[a.id]),...(xb?["B"+xb]:[])];return parts.join("-")}
 
 function go(n){step=n;
   ["s0","s1","s2","s3"].forEach((id,i)=>{$(id).classList.toggle("hidden",i!==n);if(i===n){$(id).classList.remove("enter");void $(id).offsetWidth;$(id).classList.add("enter")}});
@@ -567,24 +579,19 @@ function render(){
   renderStop();
   renderReview();
   $("xseg").innerHTML=[[0,"None",""],[100,"Small","~100 sq ft"],[250,"Medium","~250 sq ft"],[500,"Large","~500 sq ft"]].map(([v,n,d])=>`<button type="button" data-x="${v}" aria-pressed="${xb===v}">${n}${d?`<small>${d}</small>`:""}</button>`).join("");
-  ["lawn","complete","signature"].forEach(t=>$("p"+t[0].toUpperCase()+t.slice(1)).innerHTML=usd(tierPrice(q,t))+"<small> /mo</small>");
+  $("pBi").innerHTML=usd(tierPrice(q,"bi"))+"<small> /mo</small>";$("pSeason").innerHTML=usd(tierPrice(q,"season"))+"<small> /mo</small>";
   document.querySelectorAll(".tier").forEach(o=>o.setAttribute("aria-checked",o.dataset.tier===tier));
   const tick='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
-  const inc=[`Mowing, trimming, edging and blowing, ${planId==="bi"?"every other week, all year":"weekly March to October, every other week in winter"}`,`${K.rounds} rounds of fertilizer and weed control`];
+  const inc=[`${chosen().p.visits} cuts a year: mowed, string-trimmed, edged and blown clean, ${tier==="bi"?"every other week, all year":"weekly April to September, lighter in fall and winter"}`];
   const T=TIERS[tier].core;
-  if(T.includes("straw")){const bb=q.add.find(a=>a.id===(on.has("mulch")?"mulch":"straw"));inc.push(on.has("mulch")?`Hardwood mulch refreshed once a year (${bb.d.split(",")[0]})`:`Pine straw refreshed spring and fall (${bb.d.split(",")[0]})`,"Leaf cleanup, two visits in late fall")}
-  if(T.includes("color"))inc.push(`Seasonal flowers in your front beds, spring and fall`,`Shrub trimming twice a year`);
-  inc.push("Your visits on a schedule you can see, with on-the-way texts",`Dedicated text support, answered ${BUSINESS.replyPromise}`,"A full-yard check every visit, with a text of what we did and saw","Free fix within 48 hours if anything isn't right");
+  inc.push("A text the night before and after every cut","Rain moves a visit? We reschedule within 3 business days and text you the day",`Text support, answered ${BUSINESS.replyPromise}`,"Not right? Reply to your visit text and we fix it free within 48 hours");
   $("incl").innerHTML=inc.map(t=>`<div>${tick}${t}</div>`).join("");
-  $("lockNote").innerHTML=`<b>This price is locked.</b> It holds after the walk-through unless we find beds or lawn the aerial can't see, and we'll show you any change before your first charge${foundingOpen()?`, and as a founding member it holds through ${BUSINESS.founding.lockedThrough}`:""}. Quote good through ${quoteGoodThrough()}.`;
+  $("lockNote").innerHTML=`<b>This price is locked.</b> It holds after the walk-through unless we find lawn the aerial can't see, and we'll show you any change before your first charge${foundingOpen()?`, and as a founding member it holds through ${BUSINESS.founding.lockedThrough}`:""}. Quote good through ${quoteGoodThrough()}.`;
   renderShare(c);
   renderOnce();
-  const avail=q.add.filter(a=>!T.includes(a.id)&&!(T.includes("straw")&&a.id==="straw"));
-  $("extrasHead").textContent=tier==="lawn"?"Add more of the yard":"Make it yours";
-  $("extrasSub").textContent=avail.length?"Optional, priced from your yard and spread into your monthly payment.":"";
-  const shown=avail;
-  $("addons").classList.toggle("hidden",!shown.length);$("extrasHead").parentElement.classList.toggle("hidden",!shown.length);
-  $("addons").innerHTML=shown.map(a=>`<label class="row"><span><b>${a.name}</b><span class="d">${a.d}</span></span><span class="amt">+${usd(a.mo)}/mo<small>${usd(a.year)} a year</small></span><input type="checkbox" class="tog" data-id="${a.id}" ${on.has(a.id)?"checked":""} aria-label="Add ${a.name}"></label>`).join("");
+  $("extrasHead").innerHTML='Coming in 2027 <span class="soon">Soon</span>';
+  $("extrasSub").textContent="We're adding the rest of the yard one service at a time, on the same plan, text thread and payment. Tap what you'd want and you'll be first in line at founding-member prices.";
+  $("addons").innerHTML=COMING.map(([id,n,d])=>`<label class="row"><span><b>${n}</b><span class="d">${d}</span></span><span class="amt"><span class="soon">Coming soon</span></span><input type="checkbox" class="tog" data-want="${id}" ${want.has(id)?"checked":""} aria-label="Notify me about ${n}"></label>`).join("");
   // bar
   const labels=["","Looks right. Continue","Agree and continue","Go to secure checkout"];
   $("barLabel").textContent=c.name+(c.ex.length?` + ${c.ex.length} extra${c.ex.length>1?"s":""}`:"");
@@ -605,7 +612,7 @@ $("go").addEventListener("click",e=>{if($("go").getAttribute("aria-disabled")===
   if(EMBED&&!BUSINESS.bookingUrl){e.preventDefault();const c=chosen();try{window.parent.postMessage({type:"gw-sign",lot:q.lot,addr:q.addr,tier,mo:c.mo,code:planCode(),name:$("fname").value.trim(),texts:$("texts").checked,extras:c.ex.map(a=>a.id),xb},"*")}catch(err){}}});
 $("go").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("go").click()}});
 document.querySelectorAll(".tier").forEach(o=>o.addEventListener("click",()=>{tier=o.dataset.tier;render()}));
-$("addons").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
+$("addons").addEventListener("change",e=>{const w=e.target.dataset.want;if(w){if(e.target.checked){want.add(w);logEvent("interest",{extras:[w]});toast("You're first in line")}else want.delete(w);return}const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
 $("fname").addEventListener("input",()=>{$("sig").textContent=$("fname").value;render()});
 $("agree").addEventListener("change",render);
 
@@ -653,15 +660,15 @@ function renderStop(){
   const ck='<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   const hi=q.market.n>=3;
   const items=hi?[
-    ["No thinking about it","We run the yard on a schedule. You hear from us by text, not the other way around."],
-    ["No vendors to manage","Lawn, beds, shrubs and leaves: one company, one text thread, one payment."],
-    ["No surprises","Your price is locked and measured from your lot. Anything we notice, we text you before we touch it."],
+    ["No thinking about it","Your lawn is cut on a schedule. You hear from us by text, not the other way around."],
+    ["No chasing the crew","A text the night before and after every cut. One number for everything."],
+    ["No surprises","Your price is measured from your lot, locked, and the same every month."],
     ["No hassle if it's not right","Reply to your visit text and it's fixed within 48 hours, free."]]:[
-    ["No surprise bills","Every price is on this page before you start. Nothing gets billed \u201cupon completion.\u201d"],
-    ["No juggling companies","Mowing, weed control, beds and leaves on one plan, one payment."],
-    ["No chasing anyone","A text the night before and after every visit. Questions answered by text."],
+    ["No surprise bills","Your price is on this page before you start, and it's the same every month."],
+    ["No chasing anyone","A text the night before and after every cut. Questions answered by text."],
+    ["No wondering if they'll show","Rain moves a visit? We reschedule within 3 business days and text you the new day."],
     ["No lock-in","Plain-English agreement. Cancel with 30 days' notice."]];
-  $("stop").innerHTML=`<h2>${hi?"From here on, it's handled":"What you stop doing"}</h2><p class="sub">${hi?"This is what your price buys: not a mowing crew, a yard you never have to manage.":"Before you look at price, here's what comes off your plate."}</p><ul>${items.map(([b,t])=>`<li>${ck}<div><b>${b}</b><span>${t}</span></div></li>`).join("")}</ul><div class="rep">Most homes pay separately for mowing, weed control, pine straw and leaf cleanup, and manage each one. Your plan below covers what you choose, on one price.</div>`}
+  $("stop").innerHTML=`<h2>${hi?"From here on, it's handled":"What you stop doing"}</h2><p class="sub">${hi?"Not just a mowing crew: a lawn you never have to think about.":"Before you look at price, here's what comes off your plate."}</p><ul>${items.map(([b,t])=>`<li>${ck}<div><b>${b}</b><span>${t}</span></div></li>`).join("")}</ul><div class="rep">We're starting with mowing and doing it right. Lawn treatments, beds, leaves and shrubs are coming in 2027, and they'll join the same plan, text thread and payment.</div>`}
 
 /* ---------- Quote logging: funnel by neighborhood tier (insert-only table quote_events) ---------- */
 const NOLOG=(()=>{try{if(/[?&]nolog/.test(location.search))localStorage.setItem("gw-nolog","1");return OWNER||EMBED||localStorage.getItem("gw-nolog")==="1"}catch(e){return OWNER||EMBED}})();
@@ -669,8 +676,8 @@ const SESSION=(()=>{try{return crypto.randomUUID()}catch(e){return Math.random()
 const UTM=(()=>{const p=new URLSearchParams(location.search),o={};["utm_source","utm_medium","utm_campaign","utm_content"].forEach(k=>{if(p.get(k))o[k]=p.get(k).slice(0,80)});return Object.keys(o).length?o:null})();
 function logEvent(event,extra={}){if(NOLOG||!q||!cur||!DB.key)return;try{const c=chosen(),g=cur[5]||{};
   const body={session:SESSION,event,property_id:q.lot>100000?q.lot-100000:null,address:String(q.addr).slice(0,200),market_tier:q.market.n,market_value:g.mv||null,
-    lawn_sqft:Math.round(q.turf),beds_sqft:Math.round(q.beds.sq),price_lawn:tierPrice(q,"lawn"),price_complete:tierPrice(q,"complete"),price_signature:tierPrice(q,"signature"),
-    plan_shown:q.market.plan,plan:tier,frequency:TIERS[tier].freq,price_mo:c.mo,extras:c.ex.map(a=>a.id),hidden_beds:xb,
+    lawn_sqft:Math.round(q.turf),beds_sqft:Math.round(q.beds.sq),price_lawn:tierPrice(q,"bi"),price_complete:tierPrice(q,"season"),price_signature:null,
+    plan_shown:q.market.plan,plan:tier,frequency:TIERS[tier].freq,price_mo:c.mo,extras:[...c.ex.map(a=>a.id),...[...want].map(w=>"want:"+w)],hidden_beds:xb,
     referrer:document.referrer?document.referrer.slice(0,200):null,utm:UTM,...extra};
   fetch(DB.url+"/rest/v1/quote_events",{method:"POST",keepalive:true,headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)}).catch(()=>{})}catch(e){}}
 
@@ -694,11 +701,11 @@ function renderShort(){
   const c=chosen();
   $("short").innerHTML=`<h3>The short version</h3><ul>
    <li><b>${usd(c.mo)} a month</b>, the same every month, charged on the 1st once service starts in ${esc(BUSINESS.seasonStart)}. Nothing is charged before your first visit.</li>
-   <li><b>Your price holds after the walk-through,</b> unless we find beds or lawn the aerial can't see, like under a deck. You'd see any change before your first charge and can say no.</li>
+   <li><b>Your price holds after the walk-through,</b> unless we find lawn the aerial can't see. You'd see any change before your first charge and can say no.</li>
    <li><b>12 months, then it renews.</b> We tell you 30 days ahead about any price change${foundingOpen()?`; as a founding member there won't be one through ${BUSINESS.founding.lockedThrough}`:""}.</li>
    <li><b>Cancel anytime with 30 days' notice.</b> If you leave mid-year, we settle up so you've paid for exactly the work done, no more and no less.</li>
    <li><b>Not right? Reply within 48 hours</b> and we come back and fix it free.</li>
-   <li><b>A text after every visit</b> and before every treatment. Reply STOP anytime.</li>
+   <li><b>${chosen().p.visits} cuts a year,</b> with a text the night before and after each one. Reply STOP anytime.</li>
   </ul>`;
 }
 
@@ -708,30 +715,28 @@ function renderDoc(){
   const coreRows=c.core.map(a=>`<tr><td>${a.name}<br><span class="note">${a.d}. ${a.unit}. ${a.sched}.</span></td><td>Included</td></tr>`).join("");
   const exRows=c.ex.map(a=>`<tr><td>${a.name}<br><span class="note">${a.d}. ${a.unit}. ${a.sched}.</span></td><td>${usd(a.mo)}/mo</td></tr>`).join("");
   $("doc").innerHTML=`
-  <h3>${TIERS[tier].name} Service Agreement</h3>
+  <h3>Mowing Service Agreement</h3>
   <p class="note">Between ${esc(BUSINESS.legal)} (“we”) and the property owner named below (“you”) for <b>${esc(q.addr)}, Kennesaw, GA 30152</b>. Prepared ${today}.</p>
   <h4>1. Your plan</h4>
-  <table class="terms"><tr><td>${c.name}<br><span class="note">${p.name}: about ${p.visits} mowing visits and ${K.rounds} lawn treatments a year</span></td><td>${c.core.length?"":usd(p.mo)+"/mo"}</td></tr>${coreRows}${exRows}<tr><td><b>Monthly payment</b></td><td>${usd(c.mo)}/mo</td></tr><tr><td>Term</td><td>12 months</td></tr></table>
+  <table class="terms"><tr><td>${c.name}<br><span class="note">${p.name}: about ${p.visits} mowing visits a year</span></td><td>${usd(p.mo)}/mo</td></tr>${coreRows}${exRows}<tr><td><b>Monthly payment</b></td><td>${usd(c.mo)}/mo</td></tr><tr><td>Term</td><td>12 months</td></tr></table>
   <h4>2. What each mowing visit includes</h4>
   <p>Mowing of all lawn areas, string trimming around beds, fences and structures, edging along driveways, walks and curbs, and blowing clippings off hard surfaces. We mow at the height recommended for your grass type and season.</p>
-  <h4>3. Lawn treatments</h4>
-  <p>${K.rounds} rounds a year of fertilizer, pre-emergent and post-emergent weed control, applied by or under the supervision of a Georgia-licensed commercial pesticide applicator (${esc(BUSINESS.license)}). We follow every product label. We will text you before each treatment; keep children and pets off treated areas until the product has dried, as the label directs.</p>
-  <h4>4. Schedule and weather</h4>
-  <p>Service begins in ${esc(BUSINESS.seasonStart)}, after a free walk-through. Your upcoming visits are visible in your online account, and we text you when the crew is on the way. Every crew wears our uniform, and every crew member has passed a background check. Visit frequency follows grass growth: lighter in early spring and late fall, heavier in summer. If rain or unsafe conditions prevent a visit, we reschedule it within 3 business days and text you the new date.</p>
-  <h4>5. Watching the whole yard</h4>
+  <h4>3. Schedule and weather</h4>
+  <p>Service begins in ${esc(BUSINESS.seasonStart)}, after a free walk-through. Your upcoming visits are visible in your online account, and we text you when the crew is on the way. Every crew wears our uniform, and every crew member has passed a background check. ${tier==="bi"?"We mow every other week all year; winter visits keep the lawn and edges tidy while grass is dormant.":"Visits follow grass growth: weekly April to September, every other week in March, October and November, and once a month December to February."} If rain or unsafe conditions prevent a visit, we reschedule it within 3 business days and text you the new date.</p>
+  <h4>4. Watching the whole yard</h4>
   <p>On every visit we look over the entire yard, not only the lawn. If we see a problem such as a dry spot, a broken sprinkler head, disease, insects or fire ants, we text you what we found, with a photo when it helps, and a recommendation. Repairs outside this plan are quoted first and done only with your approval.</p>
-  <h4>6. Our quality promise</h4>
+  <h4>5. Our quality promise</h4>
   <p>We text you after every visit with what was done. If you are not satisfied with a visit, reply within 48 hours and we will return to fix it at no charge.</p>
-  <h4>7. Payment</h4>
-  <p>You pay ${usd(c.mo)} each month by card or bank account on file, charged on the 1st, starting the month of your first visit. The monthly amount is the same in busy and quiet months; it spreads the year's services evenly. If a payment fails, we will notify you and may pause service until it is resolved.</p>
-  <h4>8. Term, renewal and cancellation</h4>
-  <p>This agreement runs 12 months and renews for another 12 months unless either of us gives 30 days' written notice before the renewal date. We will tell you about any price change at least 30 days before renewal.${foundingOpen()?` Founding-member price lock: if you sign by ${fmtDate(BUSINESS.founding.deadline)}, your monthly price will not increase before ${BUSINESS.founding.lockedThrough}, except for services you add.`:""} Your quoted price is based on the lawn and bed areas measured from the county aerial${xb?` plus about ${xb} square feet of beds you told us about`:""}. It will not change after the free walk-through unless we find lawn or beds that could not be seen from the air, such as under a deck. If so, we will show you the change before your first charge, and you may decline that item or cancel without charge.</p>
-  <p>You may cancel at any time with 30 days' written notice. Because the monthly price spreads the season's work evenly, if you cancel before 12 payments we compare what you have paid with the value of services already delivered at standard per-visit rates: ${usd2(q.cut)} per mowing visit, ${usd2(q.trt)} per treatment, and the add-on prices listed above. If services delivered exceed payments made, you pay the difference; if payments exceed services, we refund it. This balance never exceeds your remaining monthly payments.</p>
-  <h4>9. Access and your property</h4>
+  <h4>6. Payment</h4>
+  <p>You pay ${usd(c.mo)} each month by card or bank account on file, charged on the 1st, starting the month of your first visit. The monthly amount is the same in busy and quiet months; it spreads the year's visits evenly. If a payment fails, we will notify you and may pause service until it is resolved.</p>
+  <h4>7. Term, renewal and cancellation</h4>
+  <p>This agreement runs 12 months and renews for another 12 months unless either of us gives 30 days' written notice before the renewal date. We will tell you about any price change at least 30 days before renewal.${foundingOpen()?` Founding-member price lock: if you sign by ${fmtDate(BUSINESS.founding.deadline)}, your monthly price will not increase before ${BUSINESS.founding.lockedThrough}, except for services you add.`:""} Your quoted price is based on the lawn area measured from the county aerial. It will not change after the free walk-through unless we find lawn that could not be seen from the air. If so, we will show you the change before your first charge, and you may decline that item or cancel without charge.</p>
+  <p>You may cancel at any time with 30 days' written notice. Because the monthly price spreads the season's work evenly, if you cancel before 12 payments we compare what you have paid with the value of services already delivered at the standard rate of ${usd2(q.cut)} per mowing visit. If services delivered exceed payments made, you pay the difference; if payments exceed services, we refund it. This balance never exceeds your remaining monthly payments.</p>
+  <h4>8. Access and your property</h4>
   <p>Please keep gates unlocked on service days and pets indoors. Tell us about irrigation heads, invisible pet fences, lighting and anything else in the lawn. We are not responsible for damage to items that were not marked or disclosed. Report any damage you believe we caused within 72 hours with photos, and we will inspect and make it right where we are at fault. We carry general liability insurance and will provide a certificate on request.</p>
-  <h4>10. Support and messages</h4>
-  <p>Text or call our support line at ${esc(BUSINESS.phone)} at any time. We answer ${esc(BUSINESS.replyPromise)}; messages that arrive outside those hours are answered by 8am the next morning. With your consent below, we will text visit reminders, treatment notices and visit reports to the number on your account. Reply STOP at any time to stop texts.</p>
-  <h4>11. General</h4>
+  <h4>9. Support and messages</h4>
+  <p>Text or call our support line at ${esc(BUSINESS.phone)} at any time. We answer ${esc(BUSINESS.replyPromise)}; messages that arrive outside those hours are answered by 8am the next morning. With your consent below, we will text visit reminders and visit reports to the number on your account. Reply STOP at any time to stop texts.</p>
+  <h4>10. General</h4>
   <p>This agreement is governed by Georgia law. It is the whole agreement between us for these services and can be changed only in writing. Questions: ${esc(BUSINESS.phone)} or ${esc(BUSINESS.email)}.</p>`;
 }
 function renderTicket(){
@@ -739,7 +744,7 @@ function renderTicket(){
   $("ticket").innerHTML=`<div class="top"><span>${esc(q.addr)}</span><b>${usd(c.mo)}<span style="font-size:1rem;font-weight:500"> /mo</span></b><span>12-month agreement, billed monthly</span></div>
   <div class="lines">
     <div class="line"><span>Signed by</span><b>${esc($("fname").value.trim())}</b></div>
-    <div class="line"><span>Coverage</span><b>${c.name}</b></div>${c.core.map(a=>`<div class="line"><span>${a.name}</span><b>Included</b></div>`).join("")}
+    <div class="line"><span>Plan</span><b>${c.name}</b></div><div class="line"><span>Cuts a year</span><b>About ${c.p.visits}</b></div>${c.core.map(a=>`<div class="line"><span>${a.name}</span><b>Included</b></div>`).join("")}
     ${c.ex.map(a=>`<div class="line"><span>${a.name}</span><b>${usd(a.mo)}/mo</b></div>`).join("")}
     ${xb?`<div class="line"><span>Beds you added</span><b>~${xb} sq ft</b></div>`:""}
     <div class="line"><span>Service starts</span><b>${esc(BUSINESS.seasonStart)}</b></div>
@@ -751,7 +756,7 @@ function renderTicket(){
 
 /* ---------- Aerial ---------- */
 let tracing=false,draft=[];
-const LAYERS_ALL=[["lawn","Lawn we mow and treat","#8fc46a"],["beds","Planting beds","#a87a4f"],["hard","Driveway and walks","#d9d6c8"],["house","House","#4a4a45"],["woods","Woods, not mowed","#2f5d3a"]];
+const LAYERS_ALL=[["lawn","Lawn we mow","#8fc46a"],["beds","Planting beds","#a87a4f"],["hard","Driveway and walks","#d9d6c8"],["house","House","#4a4a45"],["woods","Woods, not mowed","#2f5d3a"]];
 let LAYERS=LAYERS_ALL.slice(0,4);
 let focus=null,animLot=null;
 const fmt=v=>Math.round(v).toLocaleString("en-US");
