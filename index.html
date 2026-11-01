@@ -572,13 +572,24 @@ function render(){
   if(OWNER)renderOwner();
 }
 function canAgree(){return $("fname").value.trim().length>3&&$("agree").checked}
-$("go").addEventListener("click",e=>{if($("go").getAttribute("aria-disabled")==="true"){e.preventDefault();return}if(step<3){e.preventDefault();go(step+1);return}
+$("go").addEventListener("click",e=>{if($("go").getAttribute("aria-disabled")==="true"){e.preventDefault();return}if(step<3){e.preventDefault();if(step===1)logEvent("agreement");if(step===2)logEvent("signed",{name:$("fname").value.trim().slice(0,120)});go(step+1);return}
   if(EMBED&&!BUSINESS.bookingUrl){e.preventDefault();const c=chosen();try{window.parent.postMessage({type:"gw-sign",lot:q.lot,addr:q.addr,tier,mo:c.mo,code:planCode(),name:$("fname").value.trim(),texts:$("texts").checked,extras:c.ex.map(a=>a.id),xb},"*")}catch(err){}}});
 $("go").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("go").click()}});
 document.querySelectorAll(".tier").forEach(o=>o.addEventListener("click",()=>{tier=o.dataset.tier;render()}));
 $("addons").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
 $("fname").addEventListener("input",()=>{$("sig").textContent=$("fname").value;render()});
 $("agree").addEventListener("change",render);
+
+/* ---------- Quote logging: funnel by neighborhood tier (insert-only table quote_events) ---------- */
+const NOLOG=(()=>{try{if(/[?&]nolog/.test(location.search))localStorage.setItem("gw-nolog","1");return OWNER||EMBED||localStorage.getItem("gw-nolog")==="1"}catch(e){return OWNER||EMBED}})();
+const SESSION=(()=>{try{return crypto.randomUUID()}catch(e){return Math.random().toString(36).slice(2)+Date.now().toString(36)}})();
+const UTM=(()=>{const p=new URLSearchParams(location.search),o={};["utm_source","utm_medium","utm_campaign","utm_content"].forEach(k=>{if(p.get(k))o[k]=p.get(k).slice(0,80)});return Object.keys(o).length?o:null})();
+function logEvent(event,extra={}){if(NOLOG||!q||!cur||!DB.key)return;try{const c=chosen(),g=cur[5]||{};
+  const body={session:SESSION,event,property_id:q.lot>100000?q.lot-100000:null,address:String(q.addr).slice(0,200),market_tier:q.market.n,market_value:g.mv||null,
+    lawn_sqft:Math.round(q.turf),beds_sqft:Math.round(q.beds.sq),price_lawn:tierPrice(q,"lawn"),price_complete:tierPrice(q,"complete"),price_signature:tierPrice(q,"signature"),
+    plan_shown:q.market.plan,plan:tier,frequency:TIERS[tier].freq,price_mo:c.mo,extras:c.ex.map(a=>a.id),hidden_beds:xb,
+    referrer:document.referrer?document.referrer.slice(0,200):null,utm:UTM,...extra};
+  fetch(DB.url+"/rest/v1/quote_events",{method:"POST",keepalive:true,headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)}).catch(()=>{})}catch(e){}}
 
 /* ---------- Share ---------- */
 function quoteUrl(){return location.href.split("#")[0]+"#lot-"+q.lot}
@@ -588,8 +599,8 @@ function renderShare(c){
   const sms=b=>"sms:?&body="+encodeURIComponent(b);
   $("share").className="share"+(hasPhone?"":" one");
   $("share").innerHTML=`<button class="sbtn" type="button" id="shareBtn"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Text this quote</button>`+
-   (hasPhone?`<a class="sbtn" href="sms:${encodeURIComponent(BUSINESS.phone)}?&body=${encodeURIComponent(ask)}">Text us a question</a>`:"");
-  $("shareBtn").onclick=async()=>{
+   (hasPhone?`<a class="sbtn" onclick="logEvent('question')" href="sms:${encodeURIComponent(BUSINESS.phone)}?&body=${encodeURIComponent(ask)}">Text us a question</a>`:"");
+  $("shareBtn").onclick=async()=>{logEvent("share");
     if(navigator.share){try{await navigator.share({title:"Groundwork quote",text:`Lawn quote for ${q.addr}: ${c.name}, ${usd(c.mo)}/mo, price locked.`,url:quoteUrl()});return}catch(e){if(e&&e.name==="AbortError")return}}
     if(/iPhone|iPad|Android/i.test(navigator.userAgent)){location.href=sms(msg);return}
     try{await navigator.clipboard.writeText(msg);toast("Quote link copied")}catch(e){toast("Copy this link: "+quoteUrl())}
@@ -733,7 +744,7 @@ async function measureHit(h){close();input.value=h.address;cur=null;focus=null;x
   if(err||!row||row.status==="not_home"){s1.classList.add("failed");$("mlTitle").textContent=row&&row.status==="not_home"?"This looks like a common area or an empty lot":"We couldn’t measure this one automatically";
     $("mlStep").innerHTML=hasPhone?`Text us at <a href="sms:${encodeURIComponent(BUSINESS.phone)}">${esc(BUSINESS.phone)}</a> and we’ll send your price within the hour.`:"We’ll measure it by hand and text you a price within the hour.";return}
   s1.classList.remove("loading");choose(rowToL(row))}
-function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];drawAerial();go(1);try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
+function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];drawAerial();go(1);logEvent("quote");try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
 input.addEventListener("input",search);
 input.addEventListener("keydown",e=>{if(list.hidden||!hits.length)return;
   if(e.key==="ArrowDown")sel=Math.min(hits.length-1,sel+1);else if(e.key==="ArrowUp")sel=Math.max(0,sel-1);
