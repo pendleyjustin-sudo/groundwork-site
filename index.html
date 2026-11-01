@@ -307,6 +307,19 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
 .stop li span{color:rgba(255,255,255,.78);font-size:.85rem}
 .stop li svg{margin-top:2px;color:#9fb89f}
 .stop .rep{margin-top:12px;padding-top:12px;border-top:.5px solid rgba(255,255,255,.18);font-size:.82rem;color:rgba(255,255,255,.75)}
+.once{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:0 0 0 .5px var(--hair)}
+.once .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.once h3{margin:0;font-size:1.05rem}
+.once .pr{font-size:1.4rem;font-weight:800;color:var(--field);white-space:nowrap}
+.once p{margin:6px 0 0;font-size:.86rem;color:var(--muted);line-height:1.4}
+.once .obtn{margin-top:12px;width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--field);background:transparent;color:var(--field);font:inherit;font-weight:700;cursor:pointer}
+.once form{display:grid;gap:8px;margin-top:12px}
+.once .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.once .seg button{padding:9px 4px;border-radius:10px;border:0;background:var(--fill);font:inherit;font-size:.82rem;color:var(--ink);cursor:pointer}
+.once .seg button[aria-pressed="true"]{background:var(--field);color:var(--field-ink)}
+.once input{padding:11px 12px;border-radius:10px;border:.5px solid var(--hair);background:var(--paper);font:inherit}
+.once .go1{padding:12px;border-radius:12px;border:0;background:var(--field);color:var(--field-ink);font:inherit;font-weight:700;cursor:pointer}
+.once .done{margin-top:12px;background:var(--fill);border-radius:10px;padding:11px 12px;font-size:.9rem;color:var(--field)}
 .measured{font-size:.85rem;color:var(--field);background:var(--fill);border-radius:var(--r-sm);padding:9px 11px;line-height:1.35}
 @media (max-width:380px){.how{grid-template-columns:1fr}.how div{display:flex;gap:8px;align-items:baseline}.how .n{flex:none}}
 </style>
@@ -334,6 +347,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
       <div><span class="n">2</span><b>We measure your yard</b>From the county aerial, in seconds.</div>
       <div><span class="n">3</span><b>See your price, start online</b>No calls, no site visit, no salesperson.</div>
     </div>
+    <p class="nofric">Just need one cut while your regular crew is out? Same 30 seconds, no plan required.</p>
     <div class="offer" id="offer"></div>
     <div class="modern">
       <h2>All the friction, removed</h2>
@@ -412,6 +426,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
     <div class="included" id="incl"></div>
     <div><h2 id="extrasHead"></h2><p class="sub" id="extrasSub"></p></div>
     <div class="list" id="addons"></div>
+    <div class="once" id="once"></div>
     <div><h2>Not ready to decide?</h2><p class="sub">Send it to whoever you decide with, or text us a question. Your price is saved and stays the same.</p></div>
     <div class="share" id="share"></div>
   </section>
@@ -470,7 +485,8 @@ const BEDS_MEASURED={}; // lot # -> bed sq ft, traced in owner view
 /* Rates calibrated to a signed local contract (5,100 sq ft lawn, $255/mo: 26 visits with pruning and leaves, 5 treatments at $96).
    pBase/pPpk = price per mow visit; sBase/sPpk = what we pay the crew per visit. */
 const DEF={nonTurf:3700,bedDefault:600,pBase:50,pPpk:5,sBase:35,sPpk:3,tBase:60,tPpk:7,tLab:15,tMat:2,rounds:5,cBi:26,cWk:39,ovh:6,stress:8,
- strawSqftPerBale:45,strawPerBale:8,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:65,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2};
+ strawSqftPerBale:45,strawPerBale:8,strawInstalls:2,mulchSqftPerYard:100,mulchPerYard:95,colorFlats:4,colorPerFlat:65,colorRotations:2,aerBase:90,aerPpk:12,leafVisit:150,leafVisits:2,shrubVisit:150,shrubVisits:2,
+ oneMult:1.3,oneMin:85}; // one-time cut = 1.3x a plan visit (no commitment, fit into the schedule), never under $85 before tier
 
 /* Neighborhood pricing tiers, set by the median county fair-market value (FMV) of homes in the subdivision.
    Cobb subdivision medians: p50 ~$435k, p80 ~$650k, p95 ~$1.09M. Anchor: Smithwell Point ($763k) pays the
@@ -562,6 +578,7 @@ function render(){
   $("incl").innerHTML=inc.map(t=>`<div>${tick}${t}</div>`).join("");
   $("lockNote").innerHTML=`<b>This price is locked.</b> It holds after the walk-through unless we find beds or lawn the aerial can't see, and we'll show you any change before your first charge${foundingOpen()?`, and as a founding member it holds through ${BUSINESS.founding.lockedThrough}`:""}. Quote good through ${quoteGoodThrough()}.`;
   renderShare(c);
+  renderOnce();
   const avail=q.add.filter(a=>!T.includes(a.id)&&!(T.includes("straw")&&a.id==="straw"));
   $("extrasHead").textContent=tier==="lawn"?"Add more of the yard":"Make it yours";
   $("extrasSub").textContent=avail.length?"Optional, priced from your yard and spread into your monthly payment.":"";
@@ -594,6 +611,29 @@ $("agree").addEventListener("change",render);
 
 /* Hold the price in the bottom bar until the plan cards have been seen, so the value reads first. */
 try{new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&cur&&!seenPrice){seenPrice=true;render()}},{threshold:.4}).observe(document.querySelector(".tiers"))}catch(e){seenPrice=true}
+
+/* ---------- One-time cut: fill a gap, no plan. Books by text; paid after it's done. ---------- */
+let onceOpen=false,onceWhen="asap",onceDone={};
+const r5=v=>Math.round(v/5)*5;
+function oneTimePrice(){return Math.max(r5(K.oneMin*q.market.mult),r5(q.cut*K.oneMult))}
+function renderOnce(){
+  const price=oneTimePrice(),el=$("once");
+  const head=`<div class="top"><h3>Just need one cut?</h3><span class="pr">${usd(price)}</span></div>
+    <p>Regular crew out, away for a few weeks, or selling the house? We'll mow, edge, trim and blow it clean once. No plan, no contract, pay after it's done. Start a plan within 30 days and we credit it to your first month.</p>`;
+  if(onceDone[q.lot]){el.innerHTML=head+`<div class="done"><b>You're on the schedule.</b> We'll text ${esc(onceDone[q.lot])} to confirm the day. Nothing else to do.</div>`;return}
+  if(!onceOpen){el.innerHTML=head+`<button class="obtn" type="button" id="onceBtn">Book a one-time cut</button>`;$("onceBtn").onclick=()=>{onceOpen=true;renderOnce();setTimeout(()=>{try{$("onceP").focus()}catch(e){}},50)};return}
+  el.innerHTML=head+`<form id="onceF"><div class="seg" role="group" aria-label="When">${[["asap","Soonest"],["this_week","This week"],["date","Pick a day"]].map(([v,n])=>`<button type="button" data-w="${v}" aria-pressed="${onceWhen===v||(v==="date"&&/^\d/.test(onceWhen))}">${n}</button>`).join("")}</div>
+    ${onceWhen==="date"||/^\d/.test(onceWhen)?`<input type="date" id="onceD" aria-label="Day" min="${new Date(Date.now()+864e5).toISOString().slice(0,10)}" value="${/^\d/.test(onceWhen)?onceWhen:""}">`:""}
+    <input id="onceP" type="tel" inputmode="tel" autocomplete="tel" placeholder="Mobile number for the confirmation text" aria-label="Mobile number">
+    <button class="go1" type="submit">Book it for ${usd(price)}</button></form>`;
+  el.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const ph=$("onceP").value;onceWhen=b.dataset.w;renderOnce();$("onceP").value=ph});
+  const d=$("onceD");if(d)d.onchange=()=>{onceWhen=d.value||"date"};
+  $("onceF").onsubmit=async ev=>{ev.preventDefault();const ph=$("onceP").value.replace(/[^0-9+]/g,"");if(ph.replace(/\D/g,"").length<10){$("onceP").focus();return}
+    if(onceWhen==="date"){const dd=$("onceD");if(dd)dd.focus();return}
+    try{await fetch(DB.url+"/rest/v1/quote_requests",{method:"POST",headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},
+      body:JSON.stringify({address:q.addr,phone:ph,kind:"one_time",price,timing:onceWhen,property_id:q.lot>100000?q.lot-100000:null})})}catch(e){}
+    logEvent("one_time",{price_mo:price});onceDone[q.lot]=$("onceP").value.trim();onceOpen=false;renderOnce()};
+}
 
 /* ---------- "What you stop doing": the value before the price; emphasis shifts by neighborhood tier ---------- */
 function renderStop(){
@@ -777,7 +817,7 @@ async function measureHit(h){close();input.value=h.address;cur=null;focus=null;x
       try{await fetch(DB.url+"/rest/v1/quote_requests",{method:"POST",headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({address:h.address,phone:ph})})}catch(e){}
       $("mlStep").textContent="Got it. Your price is on its way by text. Nothing else to do.";};return}
   s1.classList.remove("loading");choose(rowToL(row))}
-function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];seenPrice=false;drawAerial();go(1);logEvent("quote");try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
+function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];seenPrice=false;onceOpen=false;drawAerial();go(1);logEvent("quote");if(/[?&]once/.test(location.search))setTimeout(()=>{try{$("once").scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}},400);try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
 input.addEventListener("input",search);
 input.addEventListener("keydown",e=>{if(list.hidden||!hits.length)return;
   if(e.key==="ArrowDown")sel=Math.min(hits.length-1,sel+1);else if(e.key==="ArrowUp")sel=Math.max(0,sel-1);
