@@ -293,7 +293,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
 .m-ok{color:var(--field);font-weight:700}.m-mid{color:var(--straw);font-weight:700}.m-low{color:var(--danger);font-weight:700}
 .trace .aerial{cursor:crosshair}
 /* Frictionless cues: how-it-works strip under the address box, and the "what you stop doing" block before price */
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:-4px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
 .how div{background:var(--surface);border-radius:var(--r-sm);padding:10px 10px 11px;font-size:.78rem;line-height:1.3;color:var(--muted);box-shadow:0 0 0 .5px var(--hair)}
 .how b{display:block;color:var(--field);font-size:.84rem;margin-bottom:2px}
 .how .n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--fill-2);color:var(--field);font-size:.7rem;font-weight:700;margin-bottom:6px}
@@ -404,7 +404,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
     <div class="stop" id="stop"></div>
     <div><h2>Choose your coverage</h2><p class="sub">Pick one now; switch anytime with a text. Every plan includes visit texts, your schedule, text support and the 48-hour fix.</p></div>
     <div class="tiers" role="radiogroup" aria-label="Coverage">
-      <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The grass, done right every other week</span></span><span class="tp" id="pLawn"></span></button>
+      <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The lawn, done right every other week, all year</span></span><span class="tp" id="pLawn"></span></button>
       <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds, shrubs and leaves</span></span><span class="tp" id="pComplete"></span></button>
       <button class="tier" role="radio" data-tier="signature" type="button"><span class="tn"><b>Signature Care</b><span>Everything, weekly in season, with seasonal flowers</span></span><span class="tp" id="pSignature"></span></button>
     </div>
@@ -522,7 +522,7 @@ function quote(L){
 }
 
 /* ---------- State ---------- */
-let cur=null,step=0,planId="bi",tier="complete",on=new Set(),q=null,xb=0;
+let seenPrice=false,cur=null,step=0,planId="bi",tier="complete",on=new Set(),q=null,xb=0;
 const TIERS={lawn:{name:"Lawn Care",freq:"bi",core:[]},complete:{name:"Complete Care",freq:"bi",core:["straw","leaf","shrub"]},signature:{name:"Signature Care",freq:"wk",core:["straw","leaf","color","shrub"]}};
 function coreFor(qq,t){let ids=TIERS[t].core.slice();if(on.has("mulch")&&ids.includes("straw"))ids=ids.map(i=>i==="straw"?"mulch":i);return qq.add.filter(a=>ids.includes(a.id))}
 function tierPrice(qq,t){return qq.plans[TIERS[t].freq].mo+coreFor(qq,t).reduce((s,a)=>s+a.mo,0)}
@@ -571,7 +571,9 @@ function render(){
   // bar
   const labels=["","Looks right. Continue","Agree and continue","Go to secure checkout"];
   $("barLabel").textContent=c.name+(c.ex.length?` + ${c.ex.length} extra${c.ex.length>1?"s":""}`:"");
-  $("barAmt").innerHTML=usd(c.mo)+"<small> /mo</small>";
+  const hold=step===1&&!seenPrice&&!OWNER;
+  $("barAmt").innerHTML=hold?'<small style="font-size:.95rem;font-weight:600">Your price is below</small>':usd(c.mo)+"<small> /mo</small>";
+  if(hold)$("barLabel").textContent="Measured and ready";
   const g=$("go");g.textContent=labels[step]||"";
   const blocked=(step===2&&!canAgree())||(step===3&&!BUSINESS.bookingUrl&&!EMBED);
   g.setAttribute("aria-disabled",blocked?"true":"false");
@@ -589,6 +591,9 @@ document.querySelectorAll(".tier").forEach(o=>o.addEventListener("click",()=>{ti
 $("addons").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
 $("fname").addEventListener("input",()=>{$("sig").textContent=$("fname").value;render()});
 $("agree").addEventListener("change",render);
+
+/* Hold the price in the bottom bar until the plan cards have been seen, so the value reads first. */
+try{new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&cur&&!seenPrice){seenPrice=true;render()}},{threshold:.4}).observe(document.querySelector(".tiers"))}catch(e){seenPrice=true}
 
 /* ---------- "What you stop doing": the value before the price; emphasis shifts by neighborhood tier ---------- */
 function renderStop(){
@@ -772,7 +777,7 @@ async function measureHit(h){close();input.value=h.address;cur=null;focus=null;x
       try{await fetch(DB.url+"/rest/v1/quote_requests",{method:"POST",headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({address:h.address,phone:ph})})}catch(e){}
       $("mlStep").textContent="Got it. Your price is on its way by text. Nothing else to do.";};return}
   s1.classList.remove("loading");choose(rowToL(row))}
-function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];drawAerial();go(1);logEvent("quote");try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
+function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];seenPrice=false;drawAerial();go(1);logEvent("quote");try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
 input.addEventListener("input",search);
 input.addEventListener("keydown",e=>{if(list.hidden||!hits.length)return;
   if(e.key==="ArrowDown")sel=Math.min(hits.length-1,sel+1);else if(e.key==="ArrowUp")sel=Math.max(0,sel-1);
