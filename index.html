@@ -292,6 +292,23 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
 .otable th{font-weight:600;color:var(--muted)}
 .m-ok{color:var(--field);font-weight:700}.m-mid{color:var(--straw);font-weight:700}.m-low{color:var(--danger);font-weight:700}
 .trace .aerial{cursor:crosshair}
+/* Frictionless cues: how-it-works strip under the address box, and the "what you stop doing" block before price */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:-4px}
+.how div{background:var(--surface);border-radius:var(--r-sm);padding:10px 10px 11px;font-size:.78rem;line-height:1.3;color:var(--muted);box-shadow:0 0 0 .5px var(--hair)}
+.how b{display:block;color:var(--field);font-size:.84rem;margin-bottom:2px}
+.how .n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--fill-2);color:var(--field);font-size:.7rem;font-weight:700;margin-bottom:6px}
+.nofric{font-size:.8rem;color:var(--muted);text-align:center;margin-top:-6px}
+.stop{background:var(--field);color:var(--field-ink);border-radius:var(--r);padding:18px 18px 16px}
+.stop h2{color:var(--field-ink);margin:0 0 4px}
+.stop .sub{color:rgba(255,255,255,.75);margin:0 0 12px}
+.stop ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.stop li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:.92rem;line-height:1.35}
+.stop li b{display:block;font-weight:700}
+.stop li span{color:rgba(255,255,255,.78);font-size:.85rem}
+.stop li svg{margin-top:2px;color:#9fb89f}
+.stop .rep{margin-top:12px;padding-top:12px;border-top:.5px solid rgba(255,255,255,.18);font-size:.82rem;color:rgba(255,255,255,.75)}
+.measured{font-size:.85rem;color:var(--field);background:var(--fill);border-radius:var(--r-sm);padding:9px 11px;line-height:1.35}
+@media (max-width:380px){.how{grid-template-columns:1fr}.how div{display:flex;gap:8px;align-items:baseline}.how .n{flex:none}}
 </style>
 </head>
 <body>
@@ -301,8 +318,8 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
   <header class="lawn" id="hero"><svg class="arcs" viewBox="0 0 200 200" aria-hidden="true"><path d="M20 200V120A100 100 0 0 1 120 20h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".55"/><path d="M66 200v-64a54 54 0 0 1 54-54h80" fill="none" stroke="#6b8f71" stroke-width="26" opacity=".35"/><path d="M112 200v-34a8 8 0 0 1 8-8h80" fill="none" stroke="#d9d6c8" stroke-width="26" opacity=".18"/></svg>
     <div class="mark"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><path d="M5 37V25A20 20 0 0 1 25 5h10" fill="none" stroke="#d9d6c8" stroke-width="6"/><path d="M14 37v-9a11 11 0 0 1 11-11h10" fill="none" stroke="#9fb89f" stroke-width="6"/><path d="M23 37v-4a3 3 0 0 1 3-3h9" fill="none" stroke="#6b8f71" stroke-width="6"/></svg><span class="wordmark"><b>GROUNDWORK</b><small>LANDSCAPE</small></span></div>
     <h1>Never think about your yard again.</h1>
-    <p>You're not hiring someone to mow. We take over the whole yard, lawn, beds, weeds and leaves, and keep it right all year for one monthly price.</p>
-    <div class="tag">Property care, professionally done.</div>
+    <p>Your whole yard, handled: lawn, beds, shrubs and leaves, on one monthly price. One text thread, nothing to chase, no surprises.</p>
+    <div class="tag">Seamless. Painless. Handled.</div>
   </header>
 
   <!-- Step 0: find -->
@@ -312,21 +329,23 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
       <input id="addr" type="text" autocomplete="off" placeholder="Start with your house number" role="combobox" aria-label="Your address" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list">
       <ul class="sugg" id="sugg" role="listbox" hidden></ul>
     </div>
+    <div class="how" aria-label="How it works">
+      <div><span class="n">1</span><b>Type your address</b>That's the only thing we ask.</div>
+      <div><span class="n">2</span><b>We measure your yard</b>From the county aerial, in seconds.</div>
+      <div><span class="n">3</span><b>See your price, start online</b>No calls, no site visit, no salesperson.</div>
+    </div>
     <div class="offer" id="offer"></div>
     <div class="modern">
-      <h2>Lawn care, run like a professional service</h2>
-      <p class="sub">If you pay a lawn company around $200 a month today, Complete Care costs about the same. The difference is you never think about the yard again.</p>
+      <h2>All the friction, removed</h2>
+      <p class="sub">The work in your yard looks the same from the street. Everything around it is what we changed.</p>
       <div class="vs" role="table" aria-label="How we compare">
         <div class="vsrow vshead" role="row"><span role="columnheader">The usual way</span><span role="columnheader">With us</span></div>
-        <div class="vsrow" role="row"><span role="cell">Call around and wait days for a quote</span><span role="cell">Your price in 30 seconds, from your actual lot</span></div>
-        <div class="vsrow" role="row"><span role="cell">Wondering when they'll come</span><span role="cell">See your spot on the schedule, then an on-the-way text</span></div>
-        <div class="vsrow" role="row"><span role="cell">Whoever shows up that day</span><span role="cell">Uniformed, background-checked crews, and you know who's coming</span></div>
-        <div class="vsrow" role="row"><span role="cell">Wonder whether they came this week</span><span role="cell">A text after every visit saying exactly what was done</span></div>
-        <div class="vsrow" role="row"><span role="cell">A different company for straw, leaves and aeration</span><span role="cell">One plan covers everything outside your house</span></div>
-        <div class="vsrow" role="row"><span role="cell">You spot the dead patch or the broken sprinkler</span><span role="cell">We spot it first and text you</span></div>
-        <div class="vsrow" role="row"><span role="cell">Texts that sit unanswered for days</span><span role="cell">A real answer <span class="reply"></span></span></div>
-        <div class="vsrow" role="row"><span role="cell">Invoices, checks and phone tag</span><span role="cell">One automatic payment a month</span></div>
-        <div class="vsrow" role="row"><span role="cell">A bad cut means calling and waiting</span><span role="cell">One reply, and we fix it free within 48 hours</span></div>
+        <div class="vsrow" role="row"><span role="cell">Call around, wait days for someone to come out and quote</span><span role="cell">Your price in 30 seconds, measured from your actual lot</span></div>
+        <div class="vsrow" role="row"><span role="cell">A mow guy, a weed company, a straw crew, a leaf crew</span><span role="cell">One company and one plan for everything outside the house</span></div>
+        <div class="vsrow" role="row"><span role="cell">Wondering when they're coming, or whether they came</span><span role="cell">A text the night before and a text after, saying what was done</span></div>
+        <div class="vsrow" role="row"><span role="cell">Extras billed "upon completion," price bumps at renewal</span><span role="cell">Every price on one page, locked, one automatic payment a month</span></div>
+        <div class="vsrow" role="row"><span role="cell">Fine print, long notice periods, arbitration clauses</span><span role="cell">A short, plain-English agreement. Cancel with 30 days' notice</span></div>
+        <div class="vsrow" role="row"><span role="cell">A bad cut means calling and waiting</span><span role="cell">Reply to your visit text; we fix it free within 48 hours</span></div>
       </div>
     </div>
     <div class="texts">
@@ -355,19 +374,6 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
         <div class="badge"><b>48-hour fix</b><span>Not right? We come back free</span></div>
       </div>
     </div>
-    <div class="plate">
-      <h2>What comes off your plate</h2>
-      <div class="promises">
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c1-5 2-9 3-12M10 20c.5-6 1.5-10 3-14M16 20c.5-5 1.5-8 3-11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The lawn</b><span>Mowed, edged and trimmed on schedule, fed and weeded seven times a year.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 12c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The beds</b><span>Fresh pine straw every spring and fall, so the front of the house always looks finished.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><div><b>The seasons</b><span>The leaves gone before you notice them, and aeration and overseeding added whenever your lawn needs it.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The worrying</b><span>Every visit we look over the whole yard. Dry spots, broken sprinkler heads, fire ants: you get a text and a fix before it becomes a problem.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The waiting</b><span>See every upcoming visit in your account, get a text when the crew is on the way, and know who's coming before they pull up.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><div><b>The chasing</b><span>Text your dedicated support line any time and get a real answer <span class="reply"></span>. Questions, skips, a gate code change: handled.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg></span><div><b>The admin</b><span>No calls to schedule, no invoices to chase. One payment a month, a text after every visit.</span></div></div>
-        <div class="promise"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div><b>The risk</b><span>If anything isn't right, reply to your visit text and we fix it within 48 hours, free.</span></div></div>
-      </div>
-    </div>
   </section>
 
   <!-- Step 1: build -->
@@ -393,8 +399,10 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
         </div>
       </div>
     </div>
+    <div class="measured" id="measured"></div>
     <div class="review hidden" id="review"><b>We’re double-checking this one.</b> Part of this yard was hard to read from the air, so a person reviews it. Your price is shown below and we’ll confirm it within the hour.</div>
-    <div><h2>Choose your coverage</h2><p class="sub">Three levels of coverage. Every one includes a text after each visit, a visible schedule, text support and the 48-hour redo.</p></div>
+    <div class="stop" id="stop"></div>
+    <div><h2>Choose your coverage</h2><p class="sub">Pick one now; switch anytime with a text. Every plan includes visit texts, your schedule, text support and the 48-hour fix.</p></div>
     <div class="tiers" role="radiogroup" aria-label="Coverage">
       <button class="tier" role="radio" data-tier="lawn" type="button"><span class="tn"><b>Lawn Care</b><span>The grass, done right every other week</span></span><span class="tp" id="pLawn"></span></button>
       <button class="tier" role="radio" data-tier="complete" type="button"><span class="tn"><span class="flag">Recommended</span><b>Complete Care</b><span>The whole yard: lawn, beds, shrubs and leaves</span></span><span class="tp" id="pComplete"></span></button>
@@ -404,7 +412,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
     <div class="included" id="incl"></div>
     <div><h2 id="extrasHead"></h2><p class="sub" id="extrasSub"></p></div>
     <div class="list" id="addons"></div>
-    <div><h2>Not ready to decide?</h2><p class="sub">Send this quote to whoever you decide with, or text us a question. The price stays the same.</p></div>
+    <div><h2>Not ready to decide?</h2><p class="sub">Send it to whoever you decide with, or text us a question. Your price is saved and stays the same.</p></div>
     <div class="share" id="share"></div>
   </section>
 
@@ -412,7 +420,7 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
   <section id="s2" class="hidden" style="display:flex;flex-direction:column;gap:18px">
     <div class="steprow"><button class="back" data-go="1" type="button"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Edit plan</button><span class="stepname">Step 2 of 3</span></div>
     <div class="steps" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></div>
-    <div><h2>Review your service agreement</h2><p class="sub">Here's the short version. The full agreement is one tap below.</p></div>
+    <div><h2>One short read, then you're done</h2><p class="sub">The whole agreement in plain English, about two minutes. No fine print we wouldn't want you to read.</p></div>
     <div class="short" id="short"></div>
     <details id="full"><summary class="fine">Read the full agreement</summary><article class="doc" id="doc" style="margin-top:10px"></article></details>
     <div class="fields">
@@ -427,9 +435,9 @@ body:has(#s1.loading:not(.hidden)) .bar,body:has(#s1.failed:not(.hidden)) .bar,#
   <section id="s3" class="hidden" style="display:flex;flex-direction:column;gap:18px">
     <div class="steprow"><button class="back" data-go="2" type="button"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back to agreement</button><span class="stepname">Step 3 of 3</span></div>
     <div class="steps" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></div>
-    <div><h2>You're nearly set</h2><p class="sub">Finish in our secure checkout to sign and add a card. Nothing is charged until your first visit.</p></div>
+    <div><h2>That's it. You're nearly set</h2><p class="sub">Add a card in our secure checkout and we take it from here. Nothing is charged until your first visit, and you won't need to call anyone.</p></div>
     <div class="ticket" id="ticket"></div>
-    <p class="note">Your plan code links this quote to your account at checkout. We'll schedule a free walk-through before the first visit to confirm your yard.</p>
+    <p class="note">What happens next: we text you within a day to set a free walk-through (you don't need to be home), then your first visit lands on your schedule. Your plan code links this quote to your account.</p>
   </section>
 
   <section class="owner hidden" id="owner"></section>
@@ -539,6 +547,8 @@ function render(){
   $("bedLegend").classList.toggle("hidden",!(traced[q.lot]&&traced[q.lot].length));
   $("bedNote").textContent=q.geo?"Measured from Cobb County's 2025 aerial, your property line and your home's footprint. We confirm it on your free walk-through.":(q.beds.measured?"Bed area measured from the county aerial.":"Bed area is a typical estimate for homes like yours. We confirm it on your free walk-through.");
   renderBreakdown();
+  $("measured").innerHTML=q.geo?`<b>We measured it for you.</b> ${(Math.round(q.turf/100)*100).toLocaleString("en-US")} sq ft of lawn and ${(Math.round(q.beds.sq/10)*10).toLocaleString("en-US")} sq ft of beds${q.geo.woods>300?`, with ${(Math.round(q.geo.woods/100)*100).toLocaleString("en-US")} sq ft of woods left out so you don't pay for it`:""}. No tape measure, no site visit, no waiting.`:"<b>Your yard, sized up.</b> We confirm every measurement on a free walk-through, so the price you see is the price you pay.";
+  renderStop();
   $("review").classList.toggle("hidden",!(cur[5]&&cur[5].review));
   $("xseg").innerHTML=[[0,"None",""],[100,"Small","~100 sq ft"],[250,"Medium","~250 sq ft"],[500,"Large","~500 sq ft"]].map(([v,n,d])=>`<button type="button" data-x="${v}" aria-pressed="${xb===v}">${n}${d?`<small>${d}</small>`:""}</button>`).join("");
   ["lawn","complete","signature"].forEach(t=>$("p"+t[0].toUpperCase()+t.slice(1)).innerHTML=usd(tierPrice(q,t))+"<small> /mo</small>");
@@ -559,7 +569,7 @@ function render(){
   $("addons").classList.toggle("hidden",!shown.length);$("extrasHead").parentElement.classList.toggle("hidden",!shown.length);
   $("addons").innerHTML=shown.map(a=>`<label class="row"><span><b>${a.name}</b><span class="d">${a.d}</span></span><span class="amt">+${usd(a.mo)}/mo<small>${usd(a.year)} a year</small></span><input type="checkbox" class="tog" data-id="${a.id}" ${on.has(a.id)?"checked":""} aria-label="Add ${a.name}"></label>`).join("");
   // bar
-  const labels=["","Review agreement","Continue","Go to secure checkout"];
+  const labels=["","Looks right. Continue","Agree and continue","Go to secure checkout"];
   $("barLabel").textContent=c.name+(c.ex.length?` + ${c.ex.length} extra${c.ex.length>1?"s":""}`:"");
   $("barAmt").innerHTML=usd(c.mo)+"<small> /mo</small>";
   const g=$("go");g.textContent=labels[step]||"";
@@ -579,6 +589,21 @@ document.querySelectorAll(".tier").forEach(o=>o.addEventListener("click",()=>{ti
 $("addons").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.checked){on.add(id);if(id==="mulch")on.delete("straw");if(id==="straw")on.delete("mulch")}else on.delete(id);render()});
 $("fname").addEventListener("input",()=>{$("sig").textContent=$("fname").value;render()});
 $("agree").addEventListener("change",render);
+
+/* ---------- "What you stop doing": the value before the price; emphasis shifts by neighborhood tier ---------- */
+function renderStop(){
+  const ck='<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const hi=q.market.n>=3;
+  const items=hi?[
+    ["No thinking about it","We run the yard on a schedule. You hear from us by text, not the other way around."],
+    ["No vendors to manage","Lawn, beds, shrubs and leaves: one company, one text thread, one payment."],
+    ["No surprises","Your price is locked and measured from your lot. Anything we notice, we text you before we touch it."],
+    ["No hassle if it's not right","Reply to your visit text and it's fixed within 48 hours, free."]]:[
+    ["No surprise bills","Every price is on this page before you start. Nothing gets billed \u201cupon completion.\u201d"],
+    ["No juggling companies","Mowing, weed control, beds and leaves on one plan, one payment."],
+    ["No chasing anyone","A text the night before and after every visit. Questions answered by text."],
+    ["No lock-in","Plain-English agreement. Cancel with 30 days' notice."]];
+  $("stop").innerHTML=`<h2>${hi?"From here on, it's handled":"What you stop doing"}</h2><p class="sub">${hi?"This is what your price buys: not a mowing crew, a yard you never have to manage.":"Before you look at price, here's what comes off your plate."}</p><ul>${items.map(([b,t])=>`<li>${ck}<div><b>${b}</b><span>${t}</span></div></li>`).join("")}</ul><div class="rep">Most homes pay separately for mowing, weed control, pine straw and leaf cleanup, and manage each one. Your plan below covers what you choose, on one price.</div>`}
 
 /* ---------- Quote logging: funnel by neighborhood tier (insert-only table quote_events) ---------- */
 const NOLOG=(()=>{try{if(/[?&]nolog/.test(location.search))localStorage.setItem("gw-nolog","1");return OWNER||EMBED||localStorage.getItem("gw-nolog")==="1"}catch(e){return OWNER||EMBED}})();
@@ -742,7 +767,10 @@ async function measureHit(h){close();input.value=h.address;cur=null;focus=null;x
   let row=null,err="";try{const r=await fetch(FUNC,{method:"POST",headers:fhead,body:JSON.stringify({county:h.county,pin:h.pin})});row=await r.json();if(!r.ok)err=row&&row.error||"error"}catch(e){err="network"}
   clearInterval(tick);
   if(err||!row||row.status==="not_home"){s1.classList.add("failed");$("mlTitle").textContent=row&&row.status==="not_home"?"This looks like a common area or an empty lot":"We couldn’t measure this one automatically";
-    $("mlStep").innerHTML=hasPhone?`Text us at <a href="sms:${encodeURIComponent(BUSINESS.phone)}">${esc(BUSINESS.phone)}</a> and we’ll send your price within the hour.`:"We’ll measure it by hand and text you a price within the hour.";return}
+    $("mlStep").innerHTML=`We’ll measure it by hand. Leave a number and we’ll text your price, usually within the hour.<form id="askF" style="display:flex;gap:6px;margin-top:10px;justify-content:center"><input id="askP" type="tel" inputmode="tel" autocomplete="tel" placeholder="Mobile number" aria-label="Mobile number" style="flex:1;max-width:190px;padding:10px 12px;border-radius:10px;border:0;font:inherit"><button style="padding:10px 14px;border-radius:10px;border:0;background:#d9d6c8;color:#1e3a2f;font:inherit;font-weight:700">Text me</button></form>`;
+    $("askF").onsubmit=async ev=>{ev.preventDefault();const ph=$("askP").value.replace(/[^0-9+]/g,"");if(ph.replace(/\D/g,"").length<10){$("askP").focus();return}
+      try{await fetch(DB.url+"/rest/v1/quote_requests",{method:"POST",headers:{apikey:DB.key,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({address:h.address,phone:ph})})}catch(e){}
+      $("mlStep").textContent="Got it. Your price is on its way by text. Nothing else to do.";};return}
   s1.classList.remove("loading");choose(rowToL(row))}
 function choose(L){if(L&&!Array.isArray(L))return measureHit(L);$("s1").classList.remove("loading","failed");cur=L;focus=null;xb=0;input.value=L[0];close();on=new Set();planId="bi";tier=marketFor(L[5]&&L[5].mv).plan;draft=[];drawAerial();go(1);logEvent("quote");try{history.replaceState(null,"",OWNER?"#owner":"#lot-"+L[1])}catch(e){}}
 input.addEventListener("input",search);
